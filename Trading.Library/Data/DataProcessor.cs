@@ -12,6 +12,7 @@ namespace Trading.Library.Data
         private readonly string _apiKey;
         private readonly string _apiUrl;
         private readonly string _connectionString;
+        public string path = ClientDatabase.ftse100StocksPath;
 
 
         public DataProcessor(string apiKey, string apiUrl, string connectionString)
@@ -24,33 +25,46 @@ namespace Trading.Library.Data
 
         public async Task ProcessData()
         {
+            List<string> ftse100 = ReadFile(path);
+            List<string> prices = new List<string> { "open", "high", "low", "close", "volume" };
             // Your data processing logic here, similar to the existing Main method
-            using (HttpClient httpClient = new HttpClient())
+            foreach (string company in ftse100)
             {
-                HttpResponseMessage response = await httpClient.GetAsync(_apiUrl);
-
-                if (response.IsSuccessStatusCode)
+                using (HttpClient httpClient = new HttpClient())
                 {
-                    string read = await response.Content.ReadAsStringAsync();
-                    JObject jObj = JObject.Parse(read);
+                    HttpResponseMessage response = await httpClient.GetAsync(_apiUrl);
 
-                    // Your existing data processing logic
-                    // ...
+                    if (response.IsSuccessStatusCode)
+                    {
+                        string read = await response.Content.ReadAsStringAsync();
+                        using (StringReader stringReader = new StringReader(read))
+                        using (JReader jReader = new JReader(stringReader))
+                        {
+                            Database db = new Database(_connectionString);
+                            JObject jObj = JObject.Load(jReader);
+                            //Console.WriteLine(jObj.ToString());
+                            var metaData = jObj["Meta_Data"];
+                            string outputSize = metaData["Output_Size"].ToString();
+                            string timeZone = metaData["Time_Zone"].ToString();
 
-                    // Database interactions
-                    Database db = new Database(_connectionString);
-                    Features feature = new Features(db);
-                    db.DeleteRecords();
-                    
 
-                    // Additional database interactions based on processed data
-                    // ...
-                }
-                else
-                {
-                    Console.WriteLine($"HTTP Error: {response.StatusCode} - {response.ReasonPhrase}");
+                            var data = jObj["Time_Series_(Daily)"];
+                            Dictionary<string, Dictionary<string, string>> stockInfo = data.ToObject<Dictionary<string, Dictionary<string, string>>>();
+                            foreach (string date in stockInfo.Keys)
+                            {
+                                db.InsertRecord(date, company, Convert.ToDecimal(data[date]["open"]), Convert.ToDecimal(data[date]["high"]), Convert.ToDecimal(data[date]["low"]), Convert.ToDecimal(data[date]["close"]), Convert.ToDecimal(data[date]["volume"]));
+                            }
+                            Features feature = new Features(db);
+                            //db.DeleteRecords();
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"HTTP Error: {response.StatusCode} - {response.ReasonPhrase}");
+                    }
                 }
             }
+            
         }
         public List<string> ReadFile(string filePath)
         {

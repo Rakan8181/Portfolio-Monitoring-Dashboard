@@ -22,7 +22,6 @@ namespace Trading.Library.Clients
             this.ftse100 = ftse100;
             this.ftse100Symbols = ftse100Symbols;
         }
-
         public void Menu()
         {
 

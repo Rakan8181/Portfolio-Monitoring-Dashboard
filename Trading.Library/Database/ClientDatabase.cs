@@ -12,8 +12,19 @@ namespace Trading.Library
 {
     public static class ClientDatabase
     {
+        public static readonly string ftse100StocksPath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\FTSE100Stocks.txt";
+        public static readonly string ftse100StockSymbolsPath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\FTSE100Symbols.txt";
+        public static readonly string databsePath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\Company Database.db";
 
-        private static string _connectionString = "Data Source=C:\\Users\\44734\\source\\NEA\\Company Database.db;Mode=ReadWrite;";
+        private static readonly string _connectionString = $"Data Source={databsePath};Mode=ReadWrite;";
+
+        public static string ConnectionString
+        {
+            get
+            {
+                return _connectionString;
+            }
+        }
         public static void AddClientToDatabase(Client client)
         {
             using (SqliteConnection connection = new SqliteConnection())
@@ -204,6 +215,48 @@ namespace Trading.Library
             }
 
 
+        }
+        public static void UpdateShareNumber(int clientid, string stock, int shares)
+        {
+            
+            using (SqliteConnection connection = new SqliteConnection())
+            {
+                connection.ConnectionString = _connectionString;
+                connection.Open();
+                SqliteCommand command = connection.CreateCommand();
+                command.CommandText = "update Client_Holdings set Quantity = @Shares where ClientID = @ClientID and StockName = @Stock";
+                var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
+                clientIDParameter.Value = clientid;
+                var stockParameter = command.Parameters.Add("@Stock", SqliteType.Text);
+                stockParameter.Value = stock;
+                var sharesParameter = command.Parameters.Add("@Shares", SqliteType.Text);
+                sharesParameter.Value = shares;
+                command.ExecuteNonQuery();
+            }
+        }
+        public static int GetShares(int clientid, string stock)
+        {
+            int shares = 0;
+            using (SqliteConnection connection = new SqliteConnection())
+            {
+                connection.ConnectionString = _connectionString;
+                connection.Open();
+                SqliteCommand command = connection.CreateCommand();
+                command.CommandText = "select Quantity from Client_Holdings where ClientID = @ClientID and StockName = @Stock";
+                var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
+                clientIDParameter.Value = clientid;
+                var stockParameter = command.Parameters.Add("@Stock", SqliteType.Text);
+                stockParameter.Value = stock;
+                var dataReader = command.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    shares = dataReader.GetInt16(0);
+                }
+            }
+            return shares;
+            //call a function to set all labels and things to 0
+            //then call dashobard_load to restart, so all values get updated, then im cooking
+            //then go back to trying to plot graphs, show latest price, risk.
         }
     }
 }

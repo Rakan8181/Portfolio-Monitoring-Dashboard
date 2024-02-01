@@ -41,6 +41,12 @@
             textBox2 = new TextBox();
             label8 = new Label();
             label9 = new Label();
+            button2 = new Button();
+            comboBox1 = new ComboBox();
+            textBox3 = new TextBox();
+            label10 = new Label();
+            button3 = new Button();
+            button4 = new Button();
             SuspendLayout();
             // 
             // progressBar1
@@ -161,11 +167,70 @@
             label9.TabIndex = 13;
             label9.Text = "label9";
             // 
+            // button2
+            // 
+            button2.Location = new Point(520, 71);
+            button2.Name = "button2";
+            button2.Size = new Size(228, 55);
+            button2.TabIndex = 14;
+            button2.Text = "Update Number of Shares";
+            button2.UseVisualStyleBackColor = true;
+            // 
+            // comboBox1
+            // 
+            comboBox1.FormattingEnabled = true;
+            comboBox1.Location = new Point(524, 148);
+            comboBox1.Name = "comboBox1";
+            comboBox1.Size = new Size(230, 28);
+            comboBox1.TabIndex = 15;
+            // 
+            // textBox3
+            // 
+            textBox3.Location = new Point(684, 195);
+            textBox3.Name = "textBox3";
+            textBox3.Size = new Size(70, 27);
+            textBox3.TabIndex = 16;
+            // 
+            // label10
+            // 
+            label10.AutoSize = true;
+            label10.Location = new Point(524, 198);
+            label10.Name = "label10";
+            label10.Size = new Size(125, 20);
+            label10.TabIndex = 17;
+            label10.Text = "Number of stocks";
+            // 
+            // button3
+            // 
+            button3.Location = new Point(520, 228);
+            button3.Name = "button3";
+            button3.Size = new Size(117, 47);
+            button3.TabIndex = 18;
+            button3.Text = "Add";
+            button3.UseVisualStyleBackColor = true;
+            button3.Click += button3_Click;
+            // 
+            // button4
+            // 
+            button4.Location = new Point(648, 228);
+            button4.Name = "button4";
+            button4.Size = new Size(106, 47);
+            button4.TabIndex = 19;
+            button4.Text = "Remove";
+            button4.UseVisualStyleBackColor = true;
+            button4.Click += button4_Click;
+            // 
             // Dashboard
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(796, 450);
+            Controls.Add(button4);
+            Controls.Add(button3);
+            Controls.Add(label10);
+            Controls.Add(textBox3);
+            Controls.Add(comboBox1);
+            Controls.Add(button2);
             Controls.Add(label9);
             Controls.Add(label8);
             Controls.Add(textBox2);
@@ -201,5 +266,11 @@
         private TextBox textBox2;
         private Label label8;
         private Label label9;
+        private Button button2;
+        private ComboBox comboBox1;
+        private TextBox textBox3;
+        private Label label10;
+        private Button button3;
+        private Button button4;
     }
 }

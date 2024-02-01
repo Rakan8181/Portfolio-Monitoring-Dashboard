@@ -37,6 +37,7 @@ namespace Trading.Library
                 var nameParameter7 = command.Parameters.Add("@Volume", SqliteType.Real);
                 nameParameter7.Value = volume;
                 command.ExecuteNonQuery();
+                Console.WriteLine("Successfully inserted record");
             }
         }
 

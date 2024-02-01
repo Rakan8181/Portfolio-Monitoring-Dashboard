@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data.Common;
 using System.Linq;
 using System.Text;
@@ -14,7 +15,7 @@ namespace Trading.Library
         public string _connectionString;
         //"Data Source=C:\\Users\\44734\\source\\NEA\\Company Database.db;Mode=ReadWrite;";
         private readonly Database _database;
-
+        
 
         public Features(Database database)
         {
@@ -32,11 +33,8 @@ namespace Trading.Library
             }
             return 0; //need to change this to proper defensive programming
         }
-        static bool IsWeekendOrChristmas(DateTime date)
-        {
-            return date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday || date.Date == new DateTime(date.Year, 12, 25);
-        }
-        public decimal CalculateVolatility(string company, DateTime startDate, DateTime endDate, string columnName = "Close") //volatility = STD
+
+        /*public decimal CalculateVolatility(string company, DateTime startDate, DateTime endDate, string columnName = "Close") //volatility = STD
         {
             if (columnName == "Open" || columnName == "High" || columnName == "Low" || columnName == "Close" || columnName == "Volume")
             {
@@ -59,7 +57,7 @@ namespace Trading.Library
             {
                 return 0; //need to change this to proper defensive programming
             }
-        }
+        }*/
 
         public decimal CalculateOscillator(string company, DateTime endDate, string columnName)//if this method has the same parameters as calculate return is there a point of a new method?
         {
@@ -79,6 +77,15 @@ namespace Trading.Library
             else
             {
                 return 0;
+            }
+        }
+        public void PopulateDatabase()
+        {
+            
+            List<string> features = new List<string> { "Returns", "Returns5", "Returns20", "Returns40", "Volatility5", "Volatility20", "Volatility40", "Oscillator_Price", "Oscillator_Volatility", "Oscillator_Volume" };
+            foreach (string feature in features)
+            {
+                continue;
             }
         }
         public void UpdateFeature(string columnName, string company, DateTime startDate, DateTime endDate) //error handling needed
@@ -118,6 +125,10 @@ namespace Trading.Library
             }
 
 
+        }
+        public static int CalculateVolatility(string company, DateTime startdate, DateTime endDate, string columnName)
+        {
+            return 1;
         }
     }
 }

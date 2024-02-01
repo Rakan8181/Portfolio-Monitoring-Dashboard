@@ -34,10 +34,9 @@
             label1 = new Label();
             label2 = new Label();
             label4 = new Label();
-            button2 = new Button();
             button3 = new Button();
+            comboBox1 = new ComboBox();
             label3 = new Label();
-            label5 = new Label();
             SuspendLayout();
             // 
             // textBox1
@@ -46,6 +45,7 @@
             textBox1.Name = "textBox1";
             textBox1.Size = new Size(191, 27);
             textBox1.TabIndex = 0;
+            textBox1.TextChanged += textBox1_TextChanged;
             // 
             // textBox2
             // 
@@ -91,16 +91,6 @@
             label4.Size = new Size(0, 20);
             label4.TabIndex = 8;
             // 
-            // button2
-            // 
-            button2.Location = new Point(411, 166);
-            button2.Name = "button2";
-            button2.Size = new Size(151, 53);
-            button2.TabIndex = 10;
-            button2.Text = "Dashboard";
-            button2.UseVisualStyleBackColor = true;
-            button2.Click += button2_Click;
-            // 
             // button3
             // 
             button3.Location = new Point(663, 166);
@@ -111,33 +101,32 @@
             button3.UseVisualStyleBackColor = true;
             button3.Click += button3_Click;
             // 
+            // comboBox1
+            // 
+            comboBox1.FormattingEnabled = true;
+            comboBox1.Location = new Point(25, 84);
+            comboBox1.Name = "comboBox1";
+            comboBox1.Size = new Size(273, 28);
+            comboBox1.TabIndex = 15;
+            comboBox1.SelectedIndexChanged += comboBox1_SelectedIndexChanged;
+            // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(480, 238);
+            label3.Location = new Point(25, 40);
             label3.Name = "label3";
-            label3.Size = new Size(50, 20);
-            label3.TabIndex = 13;
-            label3.Text = "label3";
-            // 
-            // label5
-            // 
-            label5.AutoSize = true;
-            label5.Location = new Point(399, 238);
-            label5.Name = "label5";
-            label5.Size = new Size(60, 20);
-            label5.TabIndex = 14;
-            label5.Text = "Clients: ";
+            label3.Size = new Size(267, 20);
+            label3.TabIndex = 16;
+            label3.Text = "Select a client to display their portfolio";
             // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 451);
-            Controls.Add(label5);
             Controls.Add(label3);
+            Controls.Add(comboBox1);
             Controls.Add(button3);
-            Controls.Add(button2);
             Controls.Add(label4);
             Controls.Add(label2);
             Controls.Add(label1);
@@ -159,9 +148,8 @@
         private Label label1;
         private Label label2;
         private Label label4;
-        private Button button2;
         private Button button3;
+        private ComboBox comboBox1;
         private Label label3;
-        private Label label5;
     }
 }
