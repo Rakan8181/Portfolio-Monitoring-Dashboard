@@ -70,18 +70,18 @@
             label1.ImageAlign = ContentAlignment.MiddleRight;
             label1.Location = new Point(486, 84);
             label1.Name = "label1";
-            label1.Size = new Size(76, 20);
+            label1.Size = new Size(80, 20);
             label1.TabIndex = 4;
-            label1.Text = "FirstName";
+            label1.Text = "First Name";
             // 
             // label2
             // 
             label2.AutoSize = true;
             label2.Location = new Point(464, 121);
             label2.Name = "label2";
-            label2.Size = new Size(98, 20);
+            label2.Size = new Size(102, 20);
             label2.TabIndex = 6;
-            label2.Text = "SecondName";
+            label2.Text = "Second Name";
             // 
             // label4
             // 

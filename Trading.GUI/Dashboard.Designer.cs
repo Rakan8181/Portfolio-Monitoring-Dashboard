@@ -47,6 +47,7 @@
             label10 = new Label();
             button3 = new Button();
             button4 = new Button();
+            label11 = new Label();
             SuspendLayout();
             // 
             // progressBar1
@@ -175,14 +176,17 @@
             button2.TabIndex = 14;
             button2.Text = "Update Number of Shares";
             button2.UseVisualStyleBackColor = true;
+            button2.Click += button2_Click_1;
             // 
             // comboBox1
             // 
+            comboBox1.AccessibleName = "";
             comboBox1.FormattingEnabled = true;
-            comboBox1.Location = new Point(524, 148);
+            comboBox1.Location = new Point(524, 161);
             comboBox1.Name = "comboBox1";
             comboBox1.Size = new Size(230, 28);
             comboBox1.TabIndex = 15;
+            comboBox1.Visible = false;
             // 
             // textBox3
             // 
@@ -190,6 +194,7 @@
             textBox3.Name = "textBox3";
             textBox3.Size = new Size(70, 27);
             textBox3.TabIndex = 16;
+            textBox3.Visible = false;
             // 
             // label10
             // 
@@ -199,6 +204,7 @@
             label10.Size = new Size(125, 20);
             label10.TabIndex = 17;
             label10.Text = "Number of stocks";
+            label10.Visible = false;
             // 
             // button3
             // 
@@ -208,6 +214,7 @@
             button3.TabIndex = 18;
             button3.Text = "Add";
             button3.UseVisualStyleBackColor = true;
+            button3.Visible = false;
             button3.Click += button3_Click;
             // 
             // button4
@@ -218,13 +225,25 @@
             button4.TabIndex = 19;
             button4.Text = "Remove";
             button4.UseVisualStyleBackColor = true;
+            button4.Visible = false;
             button4.Click += button4_Click;
+            // 
+            // label11
+            // 
+            label11.AutoSize = true;
+            label11.Location = new Point(520, 138);
+            label11.Name = "label11";
+            label11.Size = new Size(99, 20);
+            label11.TabIndex = 20;
+            label11.Text = "Choose stock:";
+            label11.Visible = false;
             // 
             // Dashboard
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(796, 450);
+            Controls.Add(label11);
             Controls.Add(button4);
             Controls.Add(button3);
             Controls.Add(label10);
@@ -272,5 +291,6 @@
         private Label label10;
         private Button button3;
         private Button button4;
+        private Label label11;
     }
 }

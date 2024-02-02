@@ -129,12 +129,14 @@ namespace Trading.GUI
         {
             string inputShares = textBox3.Text;
             ChangeShares(inputShares, true);
+            ResetForm();
         }
 
         private void button3_Click(object sender, EventArgs e) //add shares
         {
             string inputShares = textBox3.Text;
             ChangeShares(inputShares, false);
+            ResetForm();
 
         }
         private void ChangeShares(string inputShares, bool negative)
@@ -159,14 +161,14 @@ namespace Trading.GUI
                 int newShares = currentShares + sharesAdded;
                 if (newShares <= 0)
                 {
-                    MessageBox.Show($"Your new level of shares is {newShares}");
+                    MessageBox.Show($"You cannot remove {sharesAdded*-1} as your new level of shares would be {newShares}");
                 }
                 else
                 {
                     ClientDatabase.UpdateShareNumber(client.clientid, stock, newShares);
                     if (negative == true)
                     {
-                        MessageBox.Show($"Successfully removed {sharesAdded} shares from {stock}");
+                        MessageBox.Show($"Successfully removed {sharesAdded*-1} shares from {stock}");
                     }
                     else
                     {
@@ -175,5 +177,23 @@ namespace Trading.GUI
                 }
             }
         }
+
+        private void button2_Click_1(object sender, EventArgs e) //update number of shares button 
+        {
+            label11.Visible = true;
+            comboBox1.Visible = true;
+            label10.Visible = true;
+            textBox3.Visible = true;
+            button3.Visible = true;
+            button4.Visible = true;
+        }
+        private void ResetForm()
+        {
+            comboBox1.Items.Clear();
+
+
+            Dashboard_Load(this, EventArgs.Empty);
+        }
+
     }
 }

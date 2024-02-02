@@ -14,17 +14,13 @@ namespace Trading.GUI
         public string apiKey = "30CYWGJ89N4IZQZP";
         public string apiUrl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&interval=1min&apikey={apiKey}&outputsize=compact&datatype=json";
 
-        public Dictionary<int, string> clients = ClientDatabase.DisplayClients();
 
 
         public Form1()
         {
             InitializeComponent();
             InitializeClientManager();
-
         }
-
-
         // Initialize ClientManager synchronously
         private void InitializeClientManager()
         {
@@ -33,8 +29,6 @@ namespace Trading.GUI
             var stocks = dataProcessor.ReadFile(ClientDatabase.ftse100StocksPath); ;
             var stockSymbols = dataProcessor.ReadFile(ClientDatabase.ftse100StockSymbolsPath);
             clientManager = new ClientManager(ClientDatabase.ConnectionString, stocks, stockSymbols);
-            Debug.WriteLine($"Connection String after ClientManager initialization: {clientManager._connectionString}");
-
         }
         public static string CleanName(string name)
         {
@@ -76,12 +70,13 @@ namespace Trading.GUI
         }
         private void button1_Click(object sender, EventArgs e)
         {
-
+            List<string> names = ClientDatabase.DisplayClients().Values.ToList();
             string firstname = textBox1.Text;
             firstname = CleanName(firstname);
             string secondname = textBox2.Text;
             secondname = CleanName(secondname);
             secondname = secondname.Replace(" ", "");
+            string name = firstname + " " + secondname;
             if (!CheckNameValidity(firstname))
             {
                 MessageBox.Show("Invalid first name");
@@ -90,6 +85,10 @@ namespace Trading.GUI
             {
                 MessageBox.Show("Invalid second name");
             }
+            else if (names.Contains(name))
+            {
+                MessageBox.Show($"{firstname} {secondname} already is a client");
+            }
             else
             {
                 int clientid = ClientDatabase.NextAvailableClientID();
@@ -97,11 +96,13 @@ namespace Trading.GUI
                 ClientDatabase.AddClientToDatabase(client);
                 MessageBox.Show($"{firstname} {secondname} has been added to the database");
             }
+            ResetForm();
 
         }
         //use ClientDatabase.AddStock() to add new or existing clients' stocks!!!!
         private void Form1_Load(object sender, EventArgs e)
         {
+            Dictionary<int, string> clients = ClientDatabase.DisplayClients();
             List<string> names = clients.Values.ToList();
             foreach (string name in names)
             {
@@ -129,17 +130,20 @@ namespace Trading.GUI
         private void button3_Click(object sender, EventArgs e)
         {
             string firstname = textBox1.Text;
+            firstname = CleanName(firstname);
             string secondname = textBox2.Text;
+            secondname = CleanName(secondname);
             int clientid = ClientDatabase.GetClientID(firstname, secondname);
             if (clientid == -1)
             {
-                MessageBox.Show($"Client {firstname} {secondname} not in database");
+                MessageBox.Show($"Client: {firstname} {secondname} not in database");
             }
             else
             {
                 ClientDatabase.RemoveClient(clientid);
                 MessageBox.Show($"{firstname} {secondname} has been removed from the database");
             }
+            ResetForm();
 
         }
 
@@ -164,6 +168,11 @@ namespace Trading.GUI
             Dashboard dashboard = new Dashboard(client);
             dashboard.Show();
 
+        }
+        private void ResetForm()
+        {
+            comboBox1.Items.Clear();
+            Form1_Load(this, EventArgs.Empty);
         }
     }
 }
