@@ -9,20 +9,16 @@ namespace Trading.Library.Data
 {
     public class DataProcessor
     {
-        private readonly string _apiKey;
-        private readonly string _apiUrl;
-        private readonly string _connectionString;
-        public string path = ClientDatabase.ftse100StocksPath;
+        private readonly string apiKey;
+        private readonly string connectionString;
+        public string path = ClientDatabase.ftse100StockSymbolsPath;
 
-
-        public DataProcessor(string apiKey, string apiUrl, string connectionString)
+        public DataProcessor(string _apiKey, string _connectionString)
         {
-            _apiKey = apiKey;
-            _apiUrl = apiUrl;
-            _connectionString = connectionString;
+            apiKey = _apiKey;
+            connectionString = _connectionString;
 
         }
-
         public async Task ProcessData()
         {
             List<string> ftse100 = ReadFile(path);
@@ -30,9 +26,12 @@ namespace Trading.Library.Data
             // Your data processing logic here, similar to the existing Main method
             foreach (string company in ftse100)
             {
+                string apiURL = $"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={company}&interval=1min&apikey={apiKey}&outputsize=compact&datatype=json"; //needs to be in config.json !!!
+
                 using (HttpClient httpClient = new HttpClient())
                 {
-                    HttpResponseMessage response = await httpClient.GetAsync(_apiUrl);
+                    
+                    HttpResponseMessage response = await httpClient.GetAsync(apiURL);
 
                     if (response.IsSuccessStatusCode)
                     {
@@ -40,19 +39,23 @@ namespace Trading.Library.Data
                         using (StringReader stringReader = new StringReader(read))
                         using (JReader jReader = new JReader(stringReader))
                         {
-                            Database db = new Database(_connectionString);
+                            Database db = new Database(connectionString);
                             JObject jObj = JObject.Load(jReader);
                             //Console.WriteLine(jObj.ToString());
                             var metaData = jObj["Meta_Data"];
                             string outputSize = metaData["Output_Size"].ToString();
                             string timeZone = metaData["Time_Zone"].ToString();
-
+                            Console.WriteLine(metaData);
 
                             var data = jObj["Time_Series_(Daily)"];
                             Dictionary<string, Dictionary<string, string>> stockInfo = data.ToObject<Dictionary<string, Dictionary<string, string>>>();
                             foreach (string date in stockInfo.Keys)
                             {
-                                db.InsertRecord(date, company, Convert.ToDecimal(data[date]["open"]), Convert.ToDecimal(data[date]["high"]), Convert.ToDecimal(data[date]["low"]), Convert.ToDecimal(data[date]["close"]), Convert.ToDecimal(data[date]["volume"]));
+                                if (!stockInfo.ContainsKey(date))
+                                {
+                                    continue;
+                                    //db.InsertRecord(date, company, Convert.ToDecimal(data[date]["open"]), Convert.ToDecimal(data[date]["high"]), Convert.ToDecimal(data[date]["low"]), Convert.ToDecimal(data[date]["close"]), Convert.ToDecimal(data[date]["volume"]));
+                                }
                             }
                             Features feature = new Features(db);
                             //db.DeleteRecords();

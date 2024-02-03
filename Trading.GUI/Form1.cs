@@ -1,6 +1,7 @@
 using Newtonsoft.Json.Linq;
 using System.Configuration;
 using System.Diagnostics;
+using System.Net.Sockets;
 using Trading.Library;
 using Trading.Library.Clients;
 using Trading.Library.Data;
@@ -13,8 +14,8 @@ namespace Trading.GUI
         private ClientManager clientManager;
         public string apiKey = "30CYWGJ89N4IZQZP";
         public string apiUrl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&interval=1min&apikey={apiKey}&outputsize=compact&datatype=json";
-
-
+        private string _connectionstring = "C:\\Users\\44734\\source\\NEA\\Trading-App\\Company Database.db";
+        
 
         public Form1()
         {
@@ -29,7 +30,21 @@ namespace Trading.GUI
             var stocks = dataProcessor.ReadFile(ClientDatabase.ftse100StocksPath); ;
             var stockSymbols = dataProcessor.ReadFile(ClientDatabase.ftse100StockSymbolsPath);
             clientManager = new ClientManager(ClientDatabase.ConnectionString, stocks, stockSymbols);
+            foreach (var stock in stocks)
+            {
+                comboBox2.Items.Add(stock);
+            }
         }
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            Dictionary<int, string> clients = ClientDatabase.DisplayClients();
+            List<string> names = clients.Values.ToList();
+            foreach (string name in names)
+            {
+                comboBox1.Items.Add(name);
+            }
+        }
+
         public static string CleanName(string name)
         {
             // Remove spaces
@@ -100,15 +115,6 @@ namespace Trading.GUI
 
         }
         //use ClientDatabase.AddStock() to add new or existing clients' stocks!!!!
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            Dictionary<int, string> clients = ClientDatabase.DisplayClients();
-            List<string> names = clients.Values.ToList();
-            foreach (string name in names)
-            {
-                comboBox1.Items.Add(name);
-            }
-        }
 
 
 
@@ -167,12 +173,19 @@ namespace Trading.GUI
             GoldClient client = new GoldClient(clientid, firstname, secondname);
             Dashboard dashboard = new Dashboard(client);
             dashboard.Show();
-
         }
         private void ResetForm()
         {
             comboBox1.Items.Clear();
             Form1_Load(this, EventArgs.Empty);
+        }
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string stock = comboBox2.SelectedItem.ToString();
+            StockInfo stockinfo = new StockInfo(stock,_connectionstring);
+            stockinfo.Show();
+
         }
     }
 }

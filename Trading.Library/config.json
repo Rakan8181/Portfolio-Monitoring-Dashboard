@@ -1,5 +1,5 @@
 {
   "apiKey": "30CYWGJ89N4IZQZP",
-  "apiUrl": "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&interval=1min&apikey={apiKey}&outputsize=compact&datatype=json",
+  "apiUrl": "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={Company}&interval=1min&apikey={apiKey}&outputsize=compact&datatype=json",
   "connectionString": "Data Source=C:\\Users\\44734\\source\\NEA\\Company Database.db;Mode=ReadWrite;"
 }

@@ -37,6 +37,8 @@
             button3 = new Button();
             comboBox1 = new ComboBox();
             label3 = new Label();
+            label5 = new Label();
+            comboBox2 = new ComboBox();
             SuspendLayout();
             // 
             // textBox1
@@ -119,11 +121,31 @@
             label3.TabIndex = 16;
             label3.Text = "Select a client to display their portfolio";
             // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(25, 272);
+            label5.Name = "label5";
+            label5.Size = new Size(221, 20);
+            label5.TabIndex = 17;
+            label5.Text = "Select stock to view information";
+            // 
+            // comboBox2
+            // 
+            comboBox2.FormattingEnabled = true;
+            comboBox2.Location = new Point(25, 311);
+            comboBox2.Name = "comboBox2";
+            comboBox2.Size = new Size(267, 28);
+            comboBox2.TabIndex = 18;
+            comboBox2.SelectedIndexChanged += comboBox2_SelectedIndexChanged;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 451);
+            Controls.Add(comboBox2);
+            Controls.Add(label5);
             Controls.Add(label3);
             Controls.Add(comboBox1);
             Controls.Add(button3);
@@ -151,5 +173,7 @@
         private Button button3;
         private ComboBox comboBox1;
         private Label label3;
+        private Label label5;
+        private ComboBox comboBox2;
     }
 }
