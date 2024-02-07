@@ -12,26 +12,39 @@ namespace Trading.Library
 {
     public class Features
     {
-        public string _connectionString;
-        //"Data Source=C:\\Users\\44734\\source\\NEA\\Company Database.db;Mode=ReadWrite;";
-        private readonly Database _database;
+        //connectionString : "Data Source=C:\\Users\\44734\\source\\NEA\\Company Database.db;Mode=ReadWrite;";
+        public DateTime oldestDate { get; }
+        public Database db { get; }
+        public string company { get; set; } //why set I have no clue !!!
         
-
-        public Features(Database database)
+        public Features(DateTime _oldestDate, Database _db)
         {
-            _database = database;
+            oldestDate = _oldestDate;
+            db = _db;
         }
-
-        public decimal CalculateReturn(string company, DateTime startDate, DateTime endDate)
+        
+        public decimal CalculateReturn(string company, DateTime date, int days)
         {
-            decimal startPrice = _database.GetData(startDate, company);
-            decimal endPrice = _database.GetData(endDate, company);
-
-            if (startPrice != -1 && endPrice != -1)
+            decimal currentPrice = db.GetData(date, company);
+            bool check = true;
+            for (int i = 0; i < days;)
             {
-                return (endPrice / startPrice) - 1;
+                date = date.AddDays(-1); // Always go back one day
+
+                // Check if the date is populated in the database
+                if (db.CheckDatePopulated(date, company))
+                {
+                    i++; // Only increment the counter if the date is populated
+                }
+
+                // Check if the targetDate has gone beyond the oldest date we are willing to check
+                if (date <= oldestDate)
+                {
+                    throw new Exception("Reached the oldest date limit without finding enough data.");
+                }
             }
-            return 0; //need to change this to proper defensive programming
+            decimal initialPrice = db.GetData(date, company);
+            return (currentPrice -  initialPrice) / initialPrice;
         }
 
         /*public decimal CalculateVolatility(string company, DateTime startDate, DateTime endDate, string columnName = "Close") //volatility = STD
@@ -64,14 +77,14 @@ namespace Trading.Library
             
             if (columnName == "Oscillator_Price")
             {
-                decimal val1 = _database.GetData(endDate, "IBM", "Returns40");
-                decimal val2 = _database.GetData(endDate, "IBM", "Returns5");
+                decimal val1 = db.GetData(endDate, "IBM", "Returns40");
+                decimal val2 = db.GetData(endDate, "IBM", "Returns5");
                 return val1 - val2; //formula for oscillator: 5 and 40 are arbitary numbers which can be changed (5 days in stock market week)
             }
             else if (columnName == "Oscillator_Volatility")
             {
-                decimal val1 = _database.GetData(endDate, "IBM", "Volatility40");
-                decimal val2 = _database.GetData(endDate, "IBM", "Volatility5");
+                decimal val1 = db.GetData(endDate, "IBM", "Volatility40");
+                decimal val2 = db.GetData(endDate, "IBM", "Volatility5");
                 return val1 - val2; //formula for oscillator: 5 and 40 are arbitary numbers which can be changed (5 days in stock market week)
             }
             else
@@ -93,7 +106,7 @@ namespace Trading.Library
             decimal result = 0;
             if (columnName == "Returns" || columnName == "Returns5" || columnName == "Returns20" || columnName == "Returns40")
             {
-                result = CalculateReturn(company, startDate, endDate);
+                result = CalculateReturn(company, startDate, 5);
                 if (result == 0)
                 {
                     throw new Exception("edge case");
@@ -110,7 +123,7 @@ namespace Trading.Library
             string end = endDate.ToString("yyyy-MM-dd");
             using (SqliteConnection connection = new SqliteConnection())
             {
-                connection.ConnectionString = _database._connectionString;
+                connection.ConnectionString = db._connectionString;
                 connection.Open();
                 SqliteCommand command = connection.CreateCommand();
                 command.CommandText = $"update Data set ({columnName}) = @Result where Date = @Date and Company = @Company";

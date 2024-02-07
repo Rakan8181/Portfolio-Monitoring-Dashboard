@@ -1,0 +1,100 @@
+Microsoft Corp
+Apple Inc.
+Nvidia Corp
+Amazon.com Inc
+Meta Platforms, Inc. Class A
+Alphabet Inc. Class A
+Alphabet Inc. Class C
+Berkshire Hathaway Class B
+Broadcom Inc.
+Eli Lilly & Co.
+Tesla, Inc.
+Jpmorgan Chase & Co.
+Unitedhealth Group Incorporated
+Visa Inc.
+Exxon Mobil Corporation
+Mastercard Incorporated
+Johnson & Johnson
+Procter & Gamble Company
+Home Depot, Inc.
+Merck & Co., Inc.
+Costco Wholesale Corp
+Abbvie Inc.
+Adobe Inc.
+Salesforce, Inc.
+Advanced Micro Devices
+Chevron Corporation
+Netflix Inc
+Walmart Inc.
+Coca-Cola Company
+Pepsico, Inc.
+Accenture Plc
+Bank of America Corporation
+Mcdonald's Corporation
+Thermo Fisher Scientific, Inc.
+Cisco Systems, Inc.
+Abbott Laboratories
+Linde Plc
+Comcast Corp
+Oracle Corp
+Intel Corp
+Verizon Communications
+The Walt Disney Company
+Intuit Inc
+Wells Fargo & Co.
+Amgen Inc
+International Business Machines Corporation
+Danaher Corporation
+Servicenow, Inc.
+Qualcomm Inc
+Caterpillar Inc.
+Pfizer Inc.
+Union Pacific Corp.
+S&p Global Inc.
+General Electric Company
+Texas Instruments Incorporated
+Philip Morris International Inc.
+Applied Materials Inc
+Uber Technologies Inc
+Intuitive Surgical Inc.
+Rtx Corporation
+Conocophillips
+Honeywell International, Inc.
+At&t Inc.
+Lowe's Companies Inc.
+Goldman Sachs Group Inc.
+Nike, Inc.
+Booking Holdings Inc.
+Nextra Energy, Inc.
+Prologis, Inc.
+Boeing Company
+Medtronic Plc
+American Express Company
+Elevance Health, Inc.
+Stryker Corporation
+Vertex Pharmaceuticals Inc
+Tjx Companies, Inc.
+Blackrock, Inc.
+Morgan Stanley
+Lam Research Corp
+Starbucks Corp
+Citigroup Inc.
+Eaton Corporation, Plcs
+Palo Alto Networks, Inc.
+Deere & Company
+Progressive Corporation
+Mondelez International, Inc. Class A
+United Parcel Service, Inc. Class B
+Regeneron Pharmaceuticals Inc
+Automatic Data Processing
+Chubb Limited
+Bristol-Myers Squibb Co.
+Gilead Sciences Inc
+Analog Devices, Inc.
+Marsh & Mclennan Companies, Inc.
+Boston Scientific Corp.
+Cvs Health Corporation
+Lockheed Martin Corp.
+Micron Technology, Inc.
+The Charles Schwab Corporation
+American Tower Corporation

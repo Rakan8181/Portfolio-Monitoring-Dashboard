@@ -12,11 +12,13 @@ namespace Trading.Library
 {
     public static class ClientDatabase
     {
-        public static readonly string ftse100StocksPath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\FTSE100Stocks.txt";
-        public static readonly string ftse100StockSymbolsPath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\FTSE100Symbols.txt";
-        public static readonly string databsePath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\Company Database.db";
+        //public static readonly string ftse100StocksPath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\FTSE100Stocks.txt";
+        //public static readonly string ftse100StockSymbolsPath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\FTSE100Symbols.txt";
+        public static readonly string StocksPath = ClientDatabase.StocksPath; //why ClientDatabase out of all possible class? !!!
+        public static readonly string SymbolsPath = ClientDatabase.SymbolsPath;
+        public static readonly string databasePath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\Company Database.db";
 
-        private static readonly string _connectionString = $"Data Source={databsePath};Mode=ReadWrite;";
+        private static readonly string _connectionString = $"Data Source={databasePath};Mode=ReadWrite;";
 
         public static string ConnectionString
         {
@@ -118,7 +120,7 @@ namespace Trading.Library
                 connection.ConnectionString = _connectionString;
                 connection.Open();
                 SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "select s.StockID from Client_Holdings c join Stocks s on c.StockName = s.StockName where ClientID = @ClientID";
+                command.CommandText = "select s.StockName from Client_Holdings c join Stocks s on c.StockName = s.StockName where ClientID = @ClientID";
                 var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
                 clientIDParameter.Value = clientID;
                 var dataReader = command.ExecuteReader();
@@ -128,9 +130,6 @@ namespace Trading.Library
                     stockSymbols.Add(symbol);
                 }
             }
-
-
-
             return stockSymbols;
 
         }
@@ -141,11 +140,11 @@ namespace Trading.Library
                 connection.ConnectionString = _connectionString;
                 connection.Open();
                 SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "insert into Client_Holdings values (@ClientID,@StockName,@Quantity)";
+                command.CommandText = "insert into Client_Holdings values (@ClientID,@StockSymbol,@Quantity)";
                 var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
                 clientIDParameter.Value = clientid;
-                var stockNameParameter = command.Parameters.Add("@StockName", SqliteType.Text);
-                stockNameParameter.Value = stock;
+                var stockSymbolParameter = command.Parameters.Add("@StockSymbol", SqliteType.Text);
+                stockSymbolParameter.Value = stock;
                 var quantityParameter = command.Parameters.Add("@Quantity", SqliteType.Text);
                 quantityParameter.Value = quantity;
                 command.ExecuteNonQuery();

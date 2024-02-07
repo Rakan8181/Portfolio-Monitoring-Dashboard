@@ -17,33 +17,19 @@ namespace Trading.GUI
     {
         public Client client;
         public string connectionstring = "Data Source=C:\\Users\\44734\\source\\NEA\\Company Database.db;Mode=ReadWrite;";
-        public readonly string[] ftse100 = new string[] {
-"3i Group PLC", "Admiral Group", "Airtel Africa PLC", "Anglo American", "Antofagasta PLC",
-"Ashtead Group PLC", "Associated British Foods PLC", "AstraZeneca PLC", "Auto Trader Group PLC",
-"Aviva PLC", "B&M European Value Retail SA", "BAE Systems PLC", "Barclays PLC",
-"Barratt Developments PLC", "Beazley PLC", "Berkeley Group Holdings PLC", "BP PLC",
-"British American Tobacco PLC", "BT Group PLC", "Bunzl PLC", "Burberry Group PLC",
-"Centrica PLC", "Coca-Cola HBC AG", "Compass Group PLC", "ConvaTec Group PLC",
-"Croda International PLC", "DCC PLC", "Dechra Pharmaceuticals PLC", "Diageo PLC",
-"Diploma PLC", "Endeavour Mining PLC", "Entain PLC", "Experian PLC", "F&C Investment Trust PLC",
-"Flutter Entertainment PLC", "Frasers Group PLC", "Fresnillo PLC", "Glencore PLC", "GSK PLC",
-"Haleon PLC", "Halma PLC", "Hikma Pharmaceuticals PLC", "Howden Joinery Group PLC",
-"HSBC Holdings PLC", "IMI PLC", "Imperial Brands Group", "Informa PLC",
-"InterContinental Hotels Group PLC", "Intermediate Capital Group PLC",
-"International Consolidated Airlines Group SA", "Intertek Group PLC", "JD Sports Fashion PLC",
-"Kingfisher PLC", "Land Securities Group PLC", "Legal & General Group PLC",
-"Lloyds Banking Group PLC", "London Stock Exchange Group PLC", "M&G PLC",
-"Marks & Spencer Group PLC", "Melrose Industries PLC", "Mondi PLC", "National Grid PLC",
-"NatWest Group PLC", "Next PLC", "Ocado Group PLC", "Pearson PLC",
-"Pershing Square Holdings Ltd", "Phoenix Group Holdings PLC", "Prudential PLC",
-"Reckitt Benckiser Group PLC", "RELX PLC", "Rentokil Initial PLC", "Rightmove PLC",
-"Rio Tinto PLC", "Rolls Royce Holdings PLC", "RS Group PLC", "Sage Group PLC",
-"Sainsbury (J) PLC", "Schroders PLC", "Scottish Mortgage Investment Trust PLC",
-"Segro PLC", "Severn Trent PLC", "Shell PLC", "Smith & Nephew PLC", "Smith (DS) PLC",
-"Smiths Group PLC", "Smurfit Kappa Group PLC", "Spirax-Sarco Engineering PLC",
-"SSE PLC", "St James's Place PLC", "Standard Chartered PLC", "Taylor Wimpey PLC",
-"Tesco PLC", "Unilever PLC", "Unite Group PLC", "United Utilities Group PLC",
-"Vodafone Group PLC", "Weir Group PLC", "Whitbread PLC", "WPP PLC"};
+        List<string> stockSymbols = new List<string>
+        {
+            "MSFT", "AAPL", "NVDA", "AMZN", "META", "GOOGL", "GOOG", "BRK.B", "AVGO", "LLY",
+            "TSLA", "JPM", "UNH", "V", "XOM", "MA", "JNJ", "PG", "HD", "MRK",
+            "COST", "ABBV", "ADBE", "CRM", "AMD", "CVX", "NFLX", "WMT", "KO", "PEP",
+            "ACN", "BAC", "MCD", "TMO", "CSCO", "ABT", "LIN", "CMCSA", "ORCL", "INTC",
+            "VZ", "DIS", "INTU", "WFC", "AMGN", "IBM", "DHR", "NOW", "QCOM", "CAT",
+            "PFE", "UNP", "SPGI", "GE", "TXN", "PM", "AMAT", "UBER", "ISRG", "RTX",
+            "COP", "HON", "T", "LOW", "GS", "NKE", "BKNG", "NEE", "PLD", "BA",
+            "MDT", "AXP", "ELV", "SYK", "VRTX", "TJX", "BLK", "MS", "LRCX", "SBUX",
+            "C", "ETN", "PANW", "DE", "PGR", "MDLZ", "UPS", "REGN", "ADP", "CB",
+            "BMY", "GILD", "ADI", "MMC", "BSX", "CVS", "LMT", "MU", "SCHW", "AMT"
+        };
         public Dashboard(Client _client)
         {
             InitializeComponent();
@@ -94,7 +80,7 @@ namespace Trading.GUI
             {
                 MessageBox.Show("This stock is already in your portfolio");
             }
-            else if (!ftse100.Contains(stock))
+            else if (!stockSymbols.Contains(stock))
             {
                 MessageBox.Show("Invalid stock: not in FTSE100");
             }
@@ -161,14 +147,14 @@ namespace Trading.GUI
                 int newShares = currentShares + sharesAdded;
                 if (newShares <= 0)
                 {
-                    MessageBox.Show($"You cannot remove {sharesAdded*-1} as your new level of shares would be {newShares}");
+                    MessageBox.Show($"You cannot remove {sharesAdded * -1} as your new level of shares would be {newShares}");
                 }
                 else
                 {
                     ClientDatabase.UpdateShareNumber(client.clientid, stock, newShares);
                     if (negative == true)
                     {
-                        MessageBox.Show($"Successfully removed {sharesAdded*-1} shares from {stock}");
+                        MessageBox.Show($"Successfully removed {sharesAdded * -1} shares from {stock}");
                     }
                     else
                     {

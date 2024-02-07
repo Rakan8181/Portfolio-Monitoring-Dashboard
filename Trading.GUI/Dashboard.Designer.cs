@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            progressBar1 = new ProgressBar();
             label2 = new Label();
             label3 = new Label();
             label4 = new Label();
@@ -49,15 +48,6 @@
             button4 = new Button();
             label11 = new Label();
             SuspendLayout();
-            // 
-            // progressBar1
-            // 
-            progressBar1.Location = new Point(444, 389);
-            progressBar1.Name = "progressBar1";
-            progressBar1.Size = new Size(337, 55);
-            progressBar1.TabIndex = 0;
-            progressBar1.Value = 50;
-            progressBar1.Click += progressBar1_Click;
             // 
             // label2
             // 
@@ -262,7 +252,6 @@
             Controls.Add(label4);
             Controls.Add(label3);
             Controls.Add(label2);
-            Controls.Add(progressBar1);
             Name = "Dashboard";
             Text = "Dashboard";
             Load += Dashboard_Load;
@@ -271,8 +260,6 @@
         }
 
         #endregion
-
-        private ProgressBar progressBar1;
         private Label label2;
         private Label label3;
         private Label label4;

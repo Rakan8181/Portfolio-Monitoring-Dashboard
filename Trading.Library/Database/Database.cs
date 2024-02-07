@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Data.Sqlite;
+using Microsoft.VisualBasic;
 using Trading.Library;
+using Trading.Library.Data;
 
 namespace Trading.Library
 {
@@ -10,9 +12,12 @@ namespace Trading.Library
     {
         public string _connectionString;
         //"Data Source=C:\\Users\\44734\\source\\NEA\\Company Database.db;Mode=ReadWrite;";
+        public List<string> _stockNames;
+        public List<string> _stockSymbols;
         public Database(string connectionString)
         {
             _connectionString = connectionString;
+
         }
         public void InsertRecord(string date, string company, decimal open, decimal high, decimal low, decimal close, decimal volume)
         {
@@ -37,7 +42,6 @@ namespace Trading.Library
                 var nameParameter7 = command.Parameters.Add("@Volume", SqliteType.Real);
                 nameParameter7.Value = volume;
                 command.ExecuteNonQuery();
-                Console.WriteLine("Successfully inserted record");
             }
         }
 
@@ -97,24 +101,94 @@ namespace Trading.Library
                     connection.ConnectionString = _connectionString;
                     connection.Open();
                     SqliteCommand command = connection.CreateCommand();
-                    command.CommandText = "select * from Data where Company = (@Company)";
+                    command.CommandText = $"select {columnName} from Data where Company = (@Company) and Date = @Date";
+                    var columnNameParameter = command.Parameters.Add("@ColumnName", SqliteType.Text);
+                    columnNameParameter.Value = columnName;
                     var companyParameter = command.Parameters.Add("@Company", SqliteType.Text);
                     companyParameter.Value = company;
+                    var dateParameter = command.Parameters.Add("@Date", SqliteType.Text);
+                    dateParameter.Value = date;
                     var dataReader = command.ExecuteReader();
                     while (dataReader.Read())
                     {
-                        string dateRecord = dataReader.GetString(0);
-                        if (dateRecord == date)
-                        {
-                            string val = dataReader.GetString(index);
-                            decimal price = decimal.Parse(val);
-                            //Console.WriteLine("Successfully got price");
-                            return price;
-                        }
+                        decimal value = dataReader.GetDecimal(0);
+                        return value;
                     }
                 }
             }
             return -1;
+        }
+        public bool CheckDatePopulated(DateTime _date, string company) //check if the date has already been populated into database (including prices and features)
+        {
+            bool check = false;
+            string date = _date.ToString("yyyy-MM-dd");
+            int count = 0;
+            using (SqliteConnection connection = new SqliteConnection())
+            {
+                connection.ConnectionString = _connectionString;
+                connection.Open();
+                SqliteCommand command = connection.CreateCommand();
+                command.CommandText = $"select Count(*) from Data where Date = @Date and Company = @Company";
+                var dateParameter = command.Parameters.Add("@Date", SqliteType.Text);
+                dateParameter.Value = date;
+                var companyParameter = command.Parameters.Add("@Company", SqliteType.Text);
+                companyParameter.Value = company;
+                var dataReader = command.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    count = dataReader.GetInt16(0);
+                }
+            }
+            if (count == 1)
+            {
+                return true;
+            }
+            else if (count == 0)
+            {
+                return false;
+            }
+            else
+            {
+                throw new Exception("Multiple primary keys in database!");
+            }
+        }
+        public void PopulateStocksTable(List<string> _stockNames, List<string> _stockSymbols) //one time method to populate stocks table
+        {//don't know why there are 2 usings but it worked when i used it icl !!
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                for (int i = 0; i < _stockNames.Count; i++)
+                {
+                    using (var command = connection.CreateCommand())
+                    {
+                        command.CommandText = "insert into Stocks (StockName, StockSymbol) values (@StockName, @StockSymbol)";
+                        var stockNameParameter = command.Parameters.Add("@StockName", SqliteType.Text);
+                        stockNameParameter.Value = _stockNames[i];
+                        var stockSymbolParameter = command.Parameters.Add("@StockSymbol", SqliteType.Text);
+                        stockSymbolParameter.Value = _stockSymbols[i];
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+        }
+        public void UpdateValue(DateTime inputdate, string company, string columnName, decimal value) //what if value is not decimal such as volume !!
+        {
+            string date = inputdate.ToString("yyyy-MM-dd");
+            using (SqliteConnection connection = new SqliteConnection())
+            {
+                connection.ConnectionString = _connectionString;
+                connection.Open();
+                SqliteCommand command = connection.CreateCommand();
+                command.CommandText = $"update Data set {columnName} = @Value where Company = @Company and Date = @Date";
+                var dateParameter = command.Parameters.Add("@Date", SqliteType.Text);
+                dateParameter.Value = date;
+                var companyParameter = command.Parameters.Add("@Company", SqliteType.Text);
+                companyParameter.Value = company;
+                var valueParameter = command.Parameters.Add("@Value", SqliteType.Text);
+                valueParameter.Value = value;
+                command.ExecuteNonQuery();
+            }
         }
         public void DeleteRecords()
         {

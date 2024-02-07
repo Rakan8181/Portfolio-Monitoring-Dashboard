@@ -26,9 +26,9 @@ namespace Trading.GUI
         private void InitializeClientManager()
         {
 
-            DataProcessor dataProcessor = new DataProcessor(apiKey, apiUrl, ClientDatabase.ConnectionString);
-            var stocks = dataProcessor.ReadFile(ClientDatabase.ftse100StocksPath); ;
-            var stockSymbols = dataProcessor.ReadFile(ClientDatabase.ftse100StockSymbolsPath);
+            DataProcessor dataProcessor = new DataProcessor(apiKey, ClientDatabase.ConnectionString);
+            var stocks = dataProcessor.ReadFile(ClientDatabase.StocksPath); ;
+            var stockSymbols = dataProcessor.ReadFile(ClientDatabase.SymbolsPath);
             clientManager = new ClientManager(ClientDatabase.ConnectionString, stocks, stockSymbols);
             foreach (var stock in stocks)
             {
