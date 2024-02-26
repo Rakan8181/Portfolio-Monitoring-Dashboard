@@ -45,7 +45,6 @@ namespace Trading.GUI
             label5.Text = string.Join(",", symbols);
             label6.Text = client.firstName + " " + client.secondName + "'s Dashboard";
             label9.Text = string.Join(",", portfolio.Values.ToList());
-            progressBar1.Value = symbols.Count() * 10;
             foreach (string stock in portfolio.Keys)
             {
                 comboBox1.Items.Add(stock);

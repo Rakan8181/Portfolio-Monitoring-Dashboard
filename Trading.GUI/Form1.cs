@@ -14,8 +14,10 @@ namespace Trading.GUI
         private ClientManager clientManager;
         public string apiKey = "30CYWGJ89N4IZQZP";
         public string apiUrl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&interval=1min&apikey={apiKey}&outputsize=compact&datatype=json";
-        private string _connectionstring = "C:\\Users\\44734\\source\\NEA\\Trading-App\\Company Database.db";
-        
+        private string connectionString = "Data Source=C:\\Users\\44734\\source\\NEA\\Trading-App\\Company Database.db;Mode=ReadWrite;";
+
+
+
 
         public Form1()
         {
@@ -27,7 +29,7 @@ namespace Trading.GUI
         {
 
             DataProcessor dataProcessor = new DataProcessor(apiKey, ClientDatabase.ConnectionString);
-            var stocks = dataProcessor.ReadFile(ClientDatabase.StocksPath); ;
+            var stocks = dataProcessor.ReadFile(ClientDatabase.SymbolsPath);
             var stockSymbols = dataProcessor.ReadFile(ClientDatabase.SymbolsPath);
             clientManager = new ClientManager(ClientDatabase.ConnectionString, stocks, stockSymbols);
             foreach (var stock in stocks)
@@ -182,10 +184,12 @@ namespace Trading.GUI
 
         private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
+            
+            DateTime currentDate = new DateTime(2023, 9, 14);
             string stock = comboBox2.SelectedItem.ToString();
-            StockInfo stockinfo = new StockInfo(stock,_connectionstring);
+            StockInfo stockinfo = new StockInfo(stock,connectionString, currentDate);
             stockinfo.Show();
-
+            
         }
     }
 }

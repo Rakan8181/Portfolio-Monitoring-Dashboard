@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Common;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,26 +23,46 @@ namespace Trading.Library
             oldestDate = _oldestDate;
             db = _db;
         }
-        
+        public bool CheckValidReturns(DateTime date, string company, int days)
+        {
+            if (!db.CheckDatePopulated(date,company) || date <= oldestDate)
+            {
+                return false; // Date is not valid or is before the oldest date in the database
+            }
+
+            DateTime currentDate = date;
+            int validDaysCount = 0;
+
+            while (currentDate > oldestDate && validDaysCount < days)
+            {
+                // Move to the previous day
+                currentDate = currentDate.AddDays(-1);
+
+                if (db.CheckDatePopulated(currentDate,company))
+                {
+                    validDaysCount++; // Count this as a valid trading day
+                }
+            }
+
+            return validDaysCount >= days;
+        }
+
         public decimal CalculateReturn(string company, DateTime date, int days)
         {
             decimal currentPrice = db.GetData(date, company);
             bool check = true;
+            DateTime olderDate = date.AddDays(days * -1);
             for (int i = 0; i < days;)
             {
                 date = date.AddDays(-1); // Always go back one day
 
                 // Check if the date is populated in the database
-                if (db.CheckDatePopulated(date, company))
+                if (db.CheckDatePopulated(date, company)) //or db.GetData(date,company) == -1 
                 {
                     i++; // Only increment the counter if the date is populated
                 }
 
                 // Check if the targetDate has gone beyond the oldest date we are willing to check
-                if (date <= oldestDate)
-                {
-                    throw new Exception("Reached the oldest date limit without finding enough data.");
-                }
             }
             decimal initialPrice = db.GetData(date, company);
             return (currentPrice -  initialPrice) / initialPrice;

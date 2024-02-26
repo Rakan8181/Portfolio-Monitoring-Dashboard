@@ -79,10 +79,38 @@ namespace Trading.Library.Data
             DateTime oldestDate = new DateTime(2023, 09, 14);
             Features feature = new Features(oldestDate,db);
             string company = "MSFT";
-            decimal Returns = feature.CalculateReturn(company, newestDate, 1);
-            decimal Returns5 = feature.CalculateReturn(company, newestDate, 5);
-            decimal Returns20 = feature.CalculateReturn(company, newestDate, 20);
-            db.UpdateValue(newestDate, company, "Returns5",Returns5);
+            bool checkDateRange = true;
+            DateTime currentDate = oldestDate;
+            while (checkDateRange)
+            {
+                if (db.CheckDatePopulated(currentDate,company))
+                {
+                    Console.WriteLine(currentDate);
+                    if (feature.CheckValidReturns(currentDate, company, 1)){
+                        decimal Returns = feature.CalculateReturn(company, newestDate, 1);
+                    }
+                    if (feature.CheckValidReturns(currentDate, company, 5)){
+                        decimal Returns5 = feature.CalculateReturn(company, newestDate, 5);
+                    }
+                    if (feature.CheckValidReturns(currentDate, company, 20))
+                    {
+                        decimal Returns20 = feature.CalculateReturn(company, newestDate, 20);
+                        Console.WriteLine(Returns20);
+                    } 
+                    else
+                    {
+                        Console.WriteLine("out of date fam");
+                    }
+                }
+                currentDate = currentDate.AddDays(1);
+                if (currentDate > newestDate) //dates newer than newest date in database --> leave the while loop
+                {
+                    checkDateRange = false;
+                }
+            }
+
+
+            //db.UpdateValue(newestDate, company, "Returns5",Returns5);
 
         }
         public DateTime ConvertToDateTime(string inputDate)

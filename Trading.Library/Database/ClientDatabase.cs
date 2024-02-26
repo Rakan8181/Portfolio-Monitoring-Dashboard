@@ -14,8 +14,8 @@ namespace Trading.Library
     {
         //public static readonly string ftse100StocksPath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\FTSE100Stocks.txt";
         //public static readonly string ftse100StockSymbolsPath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\FTSE100Symbols.txt";
-        public static readonly string StocksPath = ClientDatabase.StocksPath; //why ClientDatabase out of all possible class? !!!
-        public static readonly string SymbolsPath = ClientDatabase.SymbolsPath;
+        public static readonly string SymbolsPath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\SandP500StocksSymbols.txt"; //why ClientDatabase out of all possible class? !!!
+        public static readonly string StocksPath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\SandP500Stocks.txt";
         public static readonly string databasePath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\Company Database.db";
 
         private static readonly string _connectionString = $"Data Source={databasePath};Mode=ReadWrite;";

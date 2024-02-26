@@ -14,14 +14,15 @@ namespace Trading.Library
         //"Data Source=C:\\Users\\44734\\source\\NEA\\Company Database.db;Mode=ReadWrite;";
         public List<string> _stockNames;
         public List<string> _stockSymbols;
+        public DateTime _currentDate;
         public Database(string connectionString)
         {
             _connectionString = connectionString;
-
+            _currentDate = new DateTime();
         }
         public void InsertRecord(string date, string company, decimal open, decimal high, decimal low, decimal close, decimal volume)
         {
-            using (SqliteConnection connection = new SqliteConnection())
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.ConnectionString = _connectionString;
                 connection.Open();
@@ -119,11 +120,11 @@ namespace Trading.Library
             return -1;
         }
         public bool CheckDatePopulated(DateTime _date, string company) //check if the date has already been populated into database (including prices and features)
-        {
+        {//i don't think i need this method as getdata returns -1 if date not in the database!!
             bool check = false;
             string date = _date.ToString("yyyy-MM-dd");
             int count = 0;
-            using (SqliteConnection connection = new SqliteConnection())
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.ConnectionString = _connectionString;
                 connection.Open();
@@ -152,6 +153,11 @@ namespace Trading.Library
                 throw new Exception("Multiple primary keys in database!");
             }
         }
+        
+
+
+
+
         public void PopulateStocksTable(List<string> _stockNames, List<string> _stockSymbols) //one time method to populate stocks table
         {//don't know why there are 2 usings but it worked when i used it icl !!
             using (var connection = new SqliteConnection(_connectionString))
