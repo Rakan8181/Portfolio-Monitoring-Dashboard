@@ -36,6 +36,9 @@
             label2 = new Label();
             label3 = new Label();
             progressBar1 = new ProgressBar();
+            label4 = new Label();
+            label5 = new Label();
+            comboBox1 = new ComboBox();
             SuspendLayout();
             // 
             // label1
@@ -60,10 +63,11 @@
             // 
             // dateTimePicker1
             // 
-            dateTimePicker1.Location = new Point(631, 41);
+            dateTimePicker1.Location = new Point(633, 82);
             dateTimePicker1.Name = "dateTimePicker1";
             dateTimePicker1.Size = new Size(116, 27);
             dateTimePicker1.TabIndex = 2;
+            dateTimePicker1.ValueChanged += dateTimePicker1_ValueChanged;
             // 
             // textBox1
             // 
@@ -108,11 +112,47 @@
             progressBar1.TabIndex = 6;
             progressBar1.Value = 40;
             // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(633, 45);
+            label4.Name = "label4";
+            label4.Size = new Size(85, 20);
+            label4.TabIndex = 7;
+            label4.Text = "Show Price ";
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(636, 135);
+            label5.Name = "label5";
+            label5.Size = new Size(50, 20);
+            label5.TabIndex = 8;
+            label5.Text = "label5";
+            // 
+            // comboBox1
+            // 
+            comboBox1.FormattingEnabled = true;
+            comboBox1.Location = new Point(543, 84);
+            comboBox1.Name = "comboBox1";
+            comboBox1.Size = new Size(66, 28);
+            comboBox1.TabIndex = 9;
+            comboBox1.SelectedIndexChanged += comboBox1_SelectedIndexChanged;
+            // 
             // StockInfo
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            
+            
+            
+            
+            
+            
+            Size = new Size(800, 450);
+            Controls.Add(comboBox1);
+            Controls.Add(label5);
+            Controls.Add(label4);
             Controls.Add(progressBar1);
             Controls.Add(label3);
             Controls.Add(label2);
@@ -136,5 +176,8 @@
         private Label label2;
         private Label label3;
         private ProgressBar progressBar1;
+        private Label label4;
+        private Label label5;
+        private ComboBox comboBox1;
     }
 }

@@ -7,7 +7,6 @@ using Microsoft.Data.Sqlite;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Trading.Library;
-using Trading.Library.Clients;
 using Trading.Library.Data;
 namespace Trading.GUI
 {
@@ -22,7 +21,7 @@ namespace Trading.GUI
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+            Application.Run(new Menu());
         }
     }
 }

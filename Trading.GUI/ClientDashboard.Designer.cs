@@ -1,6 +1,6 @@
 ﻿namespace Trading.GUI
 {
-    partial class Dashboard
+    partial class ClientDashboard
     {
         /// <summary>
         /// Required designer variable.

@@ -9,7 +9,7 @@ using static Azure.Core.HttpHeader;
 namespace Trading.GUI
 
 {
-    public partial class Form1 : Form
+    public partial class Menu : Form
     {
         private ClientManager clientManager;
         public string apiKey = "30CYWGJ89N4IZQZP";
@@ -19,7 +19,7 @@ namespace Trading.GUI
 
 
 
-        public Form1()
+        public Menu()
         {
             InitializeComponent();
             InitializeClientManager();
@@ -126,7 +126,7 @@ namespace Trading.GUI
             string secondname = textBox2.Text;
             int clientid = ClientDatabase.GetClientID(firstname, secondname);
             GoldClient client = new GoldClient(clientid, firstname, secondname);
-            Dashboard dashboard = new Dashboard(client);
+            ClientDashboard dashboard = new ClientDashboard(client);
             dashboard.Show();
         }
 
@@ -173,7 +173,7 @@ namespace Trading.GUI
             string secondname = name.Substring(indexSpace + 1);
             int clientid = ClientDatabase.GetClientID(firstname, secondname);
             GoldClient client = new GoldClient(clientid, firstname, secondname);
-            Dashboard dashboard = new Dashboard(client);
+            ClientDashboard dashboard = new ClientDashboard(client);
             dashboard.Show();
         }
         private void ResetForm()
@@ -184,12 +184,11 @@ namespace Trading.GUI
 
         private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
-            
             DateTime currentDate = new DateTime(2023, 9, 14);
             string stock = comboBox2.SelectedItem.ToString();
-            StockInfo stockinfo = new StockInfo(stock,connectionString, currentDate);
+            StockInfo stockinfo = new StockInfo(stock, connectionString, currentDate);
             stockinfo.Show();
-            
+
         }
     }
 }

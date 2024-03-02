@@ -13,7 +13,7 @@ using Trading.Library.Data;
 
 namespace Trading.GUI
 {
-    public partial class Dashboard : Form
+    public partial class ClientDashboard : Form
     {
         public Client client;
         public string connectionstring = "Data Source=C:\\Users\\44734\\source\\NEA\\Company Database.db;Mode=ReadWrite;";
@@ -30,7 +30,7 @@ namespace Trading.GUI
             "C", "ETN", "PANW", "DE", "PGR", "MDLZ", "UPS", "REGN", "ADP", "CB",
             "BMY", "GILD", "ADI", "MMC", "BSX", "CVS", "LMT", "MU", "SCHW", "AMT"
         };
-        public Dashboard(Client _client)
+        public ClientDashboard(Client _client)
         {
             InitializeComponent();
             client = _client;
