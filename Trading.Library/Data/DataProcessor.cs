@@ -11,25 +11,24 @@ namespace Trading.Library.Data
 {
     public class DataProcessor
     {
-        private readonly string connectionString;
-        private readonly string apiKey;
-        public DataProcessor( string _connectionString, string _apiKey)
+        private readonly string _connectionString;
+        private readonly string _apiKey;
+        private Database _db;
+        public DataProcessor(string connectionString, string apiKey, Database db)
         {
-            connectionString = _connectionString;
-            apiKey = _apiKey;
+            _connectionString = connectionString;
+            _apiKey = apiKey;
+            _db = db;
         }
-        public async Task ProcessData(string StockSymbolsPath = "")
+        public async Task ProcessData(List<string> stocks)
         {
             //List<string> ftse100 = ReadFile(StockSymbolsPath);
-
-            List<string> ftse100 = new List<string> { "MSFT" };
-            foreach (string company in ftse100)
+            foreach (string stock in stocks)
             {
-                string apiURL = $"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={company}&interval=1min&apikey={apiKey}&outputsize=compact&datatype=json"; //needs to be in config.json !!!
+                string apiURL = $"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={stock}&interval=1min&apikey={_apiKey}&outputsize=compact&datatype=json"; //needs to be in config.json !!!
 
                 using (HttpClient httpClient = new HttpClient())
                 {
-
                     HttpResponseMessage response = await httpClient.GetAsync(apiURL);
 
                     if (response.IsSuccessStatusCode)
@@ -38,7 +37,7 @@ namespace Trading.Library.Data
                         using (StringReader stringReader = new StringReader(read))
                         using (JReader jReader = new JReader(stringReader))
                         {
-                            Database db = new Database(connectionString);
+                            Database db = new Database(_connectionString);
                             JObject jObj = JObject.Load(jReader);
                             //Console.WriteLine(jObj.ToString());
                             var metaData = jObj["Meta_Data"];
@@ -46,20 +45,20 @@ namespace Trading.Library.Data
                             string timeZone = metaData["Time_Zone"].ToString();                            
                             var data = jObj["Time_Series_(Daily)"];
                             Dictionary<string, Dictionary<string, string>> stockInfo = data.ToObject<Dictionary<string, Dictionary<string, string>>>();
-                            string oldestDate = stockInfo.Keys.ToList()[-1];
+                            string oldestDate = stockInfo.Keys.Reverse().ToList()[0];
                             DateTime oldestdDate = ConvertToDateTime(oldestDate);
                             foreach (string date in stockInfo.Keys.Reverse()) //I want the oldest day first; if I start with the newest day, I cannot calc returns5 for example, because I haveen't yet added the price 5 days ago to the database. 
                             { // as a result I should be able to calculate features in the same foreach loop.
                                 DateTime currentDate = ConvertToDateTime(date);
-                                if (!db.CheckFieldPopulated(currentDate, company))
+                                if (!db.CheckFieldPopulated(currentDate, stock))
                                 {
-                                    db.InsertRecord(date, company, decimal.Parse(stockInfo[date]["open"]), decimal.Parse(stockInfo[date]["high"]), decimal.Parse(stockInfo[date]["low"]), decimal.Parse(stockInfo[date]["close"]), decimal.Parse(stockInfo[date]["volume"]));
+                                    db.InsertRecord(date, stock, decimal.Parse(stockInfo[date]["open"]), decimal.Parse(stockInfo[date]["high"]), decimal.Parse(stockInfo[date]["low"]), decimal.Parse(stockInfo[date]["close"]), decimal.Parse(stockInfo[date]["volume"]));
                                 }
                                 /*decimal price = -1;
-                                price = db.GetData(currentDate, company);
+                                price = db.GetData(currentDate, stock);
                                 if (price != -1) //will not add all dates <= to the last day you logged in!. 
                                 {
-                                    db.InsertRecord(date, company, decimal.Parse(stockInfo[date]["open"]), decimal.Parse(stockInfo[date]["high"]), decimal.Parse(stockInfo[date]["low"]), decimal.Parse(stockInfo[date]["close"]), decimal.Parse(stockInfo[date]["volume"]));
+                                    db.InsertRecord(date, stock, decimal.Parse(stockInfo[date]["open"]), decimal.Parse(stockInfo[date]["high"]), decimal.Parse(stockInfo[date]["low"]), decimal.Parse(stockInfo[date]["close"]), decimal.Parse(stockInfo[date]["volume"]));
                                 }*/
                             }
                             //Features feature = new Features(db);
@@ -75,64 +74,68 @@ namespace Trading.Library.Data
 
         }
 
-        public void PopulateFeatures(string company)
+        public void PopulateFeatures(List<string> stocks)
         {
-            Database db = new Database(connectionString); //!! does this need to be here or in constructor?
-            DateTime newestDate = DateTime.Now;
-            newestDate = newestDate.AddDays(-1);
-            DateTime oldestDate = new DateTime(2023, 09, 14); //ok this will always be this, just make it clear in writeup
-            Features feature = new Features(oldestDate,db);
-            bool checkDateRange = true;
-            DateTime currentDate = oldestDate;
-            while (checkDateRange)
+            foreach (string stock in stocks)
             {
-                if (db.CheckFieldPopulated(currentDate,company)) //checks if date in database, only days where the stock market is open are on database
+                Database db = new Database(_connectionString); //!! does this need to be here or in constructor?
+                DateTime newestDate = DateTime.Now;
+                newestDate = newestDate.AddDays(-1);
+                DateTime oldestDate = new DateTime(2023, 09, 14); //ok this will always be this, just make it clear in writeup
+                Features feature = new Features(oldestDate, db);
+                bool checkDateRange = true;
+                DateTime currentDate = oldestDate;
+                while (checkDateRange)
                 {
-                    Dictionary<string, int> returns = new Dictionary<string, int>() { { "Returns", 1 }, { "Returns5", 5 }, { "Returns20", 20 }, { "Returns40", 40 } };
-                    foreach (string field in returns.Keys)
+                    if (db.CheckFieldPopulated(currentDate, stock)) //checks if date in database, only days where the stock market is open are on database
                     {
-                        int n = returns[field];
-                        if (feature.CheckValidReturns(currentDate, company, n))//nice gpt function
+                        Dictionary<string, int> returns = new Dictionary<string, int>() { { "Returns", 1 }, { "Returns5", 5 }, { "Returns20", 20 }, { "Returns40", 40 } };
+                        foreach (string field in returns.Keys)
                         {
-                            decimal value = feature.CalculateReturn(company, currentDate, n);
-                            if (!db.CheckFieldPopulated(currentDate,company,field))
+                            int n = returns[field];
+                            if (feature.CheckValidReturns(currentDate, stock, n))//nice gpt function
                             {
-                                db.UpdateValue(currentDate, company, field, value);
+                                decimal value = feature.CalculateReturn(stock, currentDate, n);
+                                if (!db.CheckFieldPopulated(currentDate, stock, field))
+                                {
+                                    db.UpdateValue(currentDate, stock, field, value);
+                                }
                             }
                         }
-                    }
-                    Dictionary<string, int> volatilities = new Dictionary<string, int>() { { "Volatility5", 5 }, { "Volatility20", 20 }, { "Volatility40", 40 } };
-                    foreach (KeyValuePair<string, int> keyValuePair in volatilities)
-                    {
-                        string field = keyValuePair.Key;
-                        int n = keyValuePair.Value;
-                        if (feature.CheckValidReturns(currentDate, company, n))
+                        Dictionary<string, int> volatilities = new Dictionary<string, int>() { { "Volatility5", 5 }, { "Volatility20", 20 }, { "Volatility40", 40 } };
+                        foreach (KeyValuePair<string, int> keyValuePair in volatilities)
                         {
-                            decimal value = feature.CalculateVolatility(company, currentDate, n);
-                            if (!db.CheckFieldPopulated(currentDate, company, field))
+                            string field = keyValuePair.Key;
+                            int n = keyValuePair.Value;
+                            if (feature.CheckValidReturns(currentDate, stock, n))
                             {
-                                db.UpdateValue(currentDate, company, field, value);
+                                decimal value = feature.CalculateVolatility(stock, currentDate, n);
+                                if (!db.CheckFieldPopulated(currentDate, stock, field))
+                                {
+                                    db.UpdateValue(currentDate, stock, field, value);
+                                }
                             }
                         }
+                        if (db.CheckFieldPopulated(currentDate, stock, "Returns40")) //returns5 will have to be populated if returns40 is populated
+                        {
+                            decimal oscillatorPrice = feature.CalculateOscillator(stock, currentDate, "Price");
+                            decimal oscillatorVolatility = feature.CalculateOscillator(stock, currentDate, "Volatility");
+                            db.UpdateValue(currentDate, stock, "Oscillator_Price", oscillatorPrice);
+                            db.UpdateValue(currentDate, stock, "Oscillator_Volatility", oscillatorVolatility);
+                        }
+
                     }
-                    if (db.CheckFieldPopulated(currentDate, company, "Returns40")) //returns5 will have to be populated if returns40 is populated
+                    currentDate = currentDate.AddDays(1);
+                    if (currentDate > newestDate) //dates newer than newest date in database --> leave the while loop
                     {
-                        decimal oscillatorPrice = feature.CalculateOscillator(company, currentDate, "Price");
-                        decimal oscillatorVolatility = feature.CalculateOscillator(company, currentDate, "Volatility");
-                        db.UpdateValue(currentDate, company, "Oscillator_Price", oscillatorPrice);
-                        db.UpdateValue(currentDate, company, "Oscillator_Volatility", oscillatorVolatility);
+                        checkDateRange = false;
                     }
-                    
-                }
-                currentDate = currentDate.AddDays(1);
-                if (currentDate > newestDate) //dates newer than newest date in database --> leave the while loop
-                {
-                    checkDateRange = false;
                 }
             }
+            
 
 
-            //db.UpdateValue(newestDate, company, "Returns5",Returns5);
+            //db.UpdateValue(newestDate, stock, "Returns5",Returns5);
 
         }
 

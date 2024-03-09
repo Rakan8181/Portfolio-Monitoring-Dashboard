@@ -20,18 +20,18 @@ namespace Trading.Library
             _connectionString = connectionString;
             _currentDate = new DateTime();
         }
-        public void InsertRecord(string date, string company, decimal open, decimal high, decimal low, decimal close, decimal volume)
+        public void InsertRecord(string date, string stock, decimal open, decimal high, decimal low, decimal close, decimal volume)
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.ConnectionString = _connectionString;
                 connection.Open();
                 SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "insert into Data (Date,Company,Open,High,Low,Close,Volume) values ((@Date),(@Company),(@Open),(@High),(@Low),(@Close),(@Volume))";
+                command.CommandText = "insert into Data (Date,stock,Open,High,Low,Close,Volume) values ((@Date),(@Stock),(@Open),(@High),(@Low),(@Close),(@Volume))";
                 var nameParameter1 = command.Parameters.Add("@Date", SqliteType.Text);
                 nameParameter1.Value = date;
-                var nameParameter2 = command.Parameters.Add("@Company", SqliteType.Text);
-                nameParameter2.Value = company;
+                var nameParameter2 = command.Parameters.Add("@Stock", SqliteType.Text);
+                nameParameter2.Value = stock;
                 var nameParameter3 = command.Parameters.Add("@Open", SqliteType.Real);
                 nameParameter3.Value = open;
                 var nameParameter4 = command.Parameters.Add("@High", SqliteType.Real);
@@ -46,7 +46,7 @@ namespace Trading.Library
             }
         }
 
-        public decimal GetData(DateTime _date, string company, string fieldName = "Close") //why Close? Most commonly used in stock prices
+        public decimal GetData(DateTime _date, string stock, string fieldName = "Close") //why Close? Most commonly used in stock prices
         {
             string date = _date.ToString("yyyy-MM-dd");
             bool check = true;
@@ -102,9 +102,9 @@ namespace Trading.Library
                     connection.ConnectionString = _connectionString;
                     connection.Open();
                     SqliteCommand command = connection.CreateCommand();
-                    command.CommandText = $"select {fieldName} from Data where Company = (@Company) and Date = @Date";
-                    var companyParameter = command.Parameters.Add("@Company", SqliteType.Text);
-                    companyParameter.Value = company;
+                    command.CommandText = $"select {fieldName} from Data where Stock = (@Stock) and Date = @Date";
+                    var stockParameter = command.Parameters.Add("@Stock", SqliteType.Text);
+                    stockParameter.Value = stock;
                     var dateParameter = command.Parameters.Add("@Date", SqliteType.Text);
                     dateParameter.Value = date;
                     var dataReader = command.ExecuteReader();
@@ -117,7 +117,7 @@ namespace Trading.Library
             }
             return -1;
         }
-        public bool CheckFieldPopulated(DateTime _date, string company, string fieldName = "Close")
+        public bool CheckFieldPopulated(DateTime _date, string stock, string fieldName = "Close")
         {
             string date = _date.ToString("yyyy-MM-dd");
 
@@ -126,8 +126,8 @@ namespace Trading.Library
                 connection.Open();
                 using (SqliteCommand command = connection.CreateCommand())
                 {
-                    command.CommandText = $"SELECT {fieldName} FROM Data WHERE Company = @Company AND Date = @Date";
-                    command.Parameters.AddWithValue("@Company", company);
+                    command.CommandText = $"SELECT {fieldName} FROM Data WHERE Stock = @Stock AND Date = @Date";
+                    command.Parameters.AddWithValue("@Stock", stock);
                     command.Parameters.AddWithValue("@Date", date);
 
                     using (SqliteDataReader reader = command.ExecuteReader())
@@ -145,11 +145,17 @@ namespace Trading.Library
                 }
             }
 
-            // Field is null or no records found for the given date and company
+            // Field is null or no records found for the given date and stock
             return false;
         }
 
-        /*public bool CheckFieldPopulated(DateTime _date, string company, string field) //check if the date has already been populated into database (including prices and features)
+        public DateTime GetMostRecentDate()
+        {
+            throw new NotImplementedException();
+        }
+
+
+        /*public bool CheckFieldPopulated(DateTime _date, string stock, string field) //check if the date has already been populated into database (including prices and features)
         {//i don't think i need this method as getdata returns -1 if date not in the database!!
             string date = _date.ToString("yyyy-MM-dd");
             int count = 0;
@@ -158,11 +164,11 @@ namespace Trading.Library
                 connection.ConnectionString = _connectionString;
                 connection.Open();
                 SqliteCommand command = connection.CreateCommand();
-                command.CommandText = $"select Count({field}) from Data where Date = @Date and Company = @Company";
+                command.CommandText = $"select Count({field}) from Data where Date = @Date and stock = @stock";
                 var dateParameter = command.Parameters.Add("@Date", SqliteType.Text);
                 dateParameter.Value = date;
-                var companyParameter = command.Parameters.Add("@Company", SqliteType.Text);
-                companyParameter.Value = company;
+                var stockParameter = command.Parameters.Add("@stock", SqliteType.Text);
+                stockParameter.Value = stock;
 
                 var dataReader = command.ExecuteReader();
                 while (dataReader.Read())
@@ -204,7 +210,7 @@ namespace Trading.Library
                 }
             }
         }
-        public void UpdateValue(DateTime inputdate, string company, string fieldName, decimal value) //what if value is not decimal such as volume !!
+        public void UpdateValue(DateTime inputdate, string stock, string fieldName, decimal value) //what if value is not decimal such as volume !!
         {
             string date = inputdate.ToString("yyyy-MM-dd");
             using (SqliteConnection connection = new SqliteConnection())
@@ -212,11 +218,11 @@ namespace Trading.Library
                 connection.ConnectionString = _connectionString;
                 connection.Open();
                 SqliteCommand command = connection.CreateCommand();
-                command.CommandText = $"update Data set {fieldName} = @Value where Company = @Company and Date = @Date";
+                command.CommandText = $"update Data set {fieldName} = @Value where Stock = @Stock and Date = @Date";
                 var dateParameter = command.Parameters.Add("@Date", SqliteType.Text);
                 dateParameter.Value = date;
-                var companyParameter = command.Parameters.Add("@Company", SqliteType.Text);
-                companyParameter.Value = company;
+                var stockParameter = command.Parameters.Add("@Stock", SqliteType.Text);
+                stockParameter.Value = stock;
                 var valueParameter = command.Parameters.Add("@Value", SqliteType.Text);
                 valueParameter.Value = value;
                 command.ExecuteNonQuery();
@@ -234,7 +240,7 @@ namespace Trading.Library
                 
             }
         }
-        public List<decimal> GetAllRecords(string company, string field)
+        public List<decimal> GetAllRecords(string stock, string field)
         {
             List<decimal> values = new List<decimal>(); 
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
@@ -242,9 +248,9 @@ namespace Trading.Library
                 connection.ConnectionString = _connectionString;
                 connection.Open();
                 SqliteCommand command = connection.CreateCommand();
-                command.CommandText = $"select {field} from Data where Company = @Company";
-                var companyParameter = command.Parameters.Add("@Company", SqliteType.Text);
-                companyParameter.Value = company;
+                command.CommandText = $"select {field} from Data where Stock = @Stock";
+                var stockParameter = command.Parameters.Add("@Stock", SqliteType.Text);
+                stockParameter.Value = stock;
                 var dataReader = command.ExecuteReader();
                 while (dataReader.Read())
                 {
@@ -257,6 +263,25 @@ namespace Trading.Library
             }
             return values;
         }
+        public List<string> GetAllStocks()
+        {
+            List<string> stocks = new List<string>();
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.ConnectionString = _connectionString;
+                connection.Open();
+                SqliteCommand command = connection.CreateCommand();
+                command.CommandText = "select StockSymbol from Stocks";
+                var dataReader = command.ExecuteReader();
+                while (dataReader.Read())
+                {
+                    string stock = dataReader.GetString(0);
+                    stocks.Add(stock);
+                }
+            }
+            return stocks;
+        }
+
 
     }
 }

@@ -20,8 +20,11 @@ namespace Trading.GUI
         {
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
+
             ApplicationConfiguration.Initialize();
-            Application.Run(new Menu());
+            string connectionString = "Data Source=C:\\Users\\44734\\source\\NEA\\Trading-App\\Company Database.db;Mode=ReadWrite;";
+            Database db = new Database(connectionString);
+            Application.Run(new Menu(db));
         }
     }
 }

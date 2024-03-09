@@ -11,27 +11,28 @@ namespace Trading.GUI
 {
     public partial class Menu : Form
     {
-        private ClientManager clientManager;
-        public string apiKey = "30CYWGJ89N4IZQZP";
-        public string apiUrl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&interval=1min&apikey={apiKey}&outputsize=compact&datatype=json";
-        private string connectionString = "Data Source=C:\\Users\\44734\\source\\NEA\\Trading-App\\Company Database.db;Mode=ReadWrite;";
+        private ClientManager _clientManager;
+        private string _apiKey = "30CYWGJ89N4IZQZP";
+        private string _apiUrl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&interval=1min&apikey={apiKey}&outputsize=compact&datatype=json";
+        private string _connectionString = "Data Source=C:\\Users\\44734\\source\\NEA\\Trading-App\\Company Database.db;Mode=ReadWrite;";
+        private Database _db;
 
 
 
-
-        public Menu()
+        public Menu(Database db)
         {
             InitializeComponent();
             InitializeClientManager();
+            _db = db;
         }
         // Initialize ClientManager synchronously
         private void InitializeClientManager()
         {
 
-            DataProcessor dataProcessor = new DataProcessor(apiKey, ClientDatabase.ConnectionString);
+            DataProcessor dataProcessor = new DataProcessor(_apiKey, ClientDatabase.ConnectionString, _db);
             var stocks = dataProcessor.ReadFile(ClientDatabase.SymbolsPath);
             var stockSymbols = dataProcessor.ReadFile(ClientDatabase.SymbolsPath);
-            clientManager = new ClientManager(ClientDatabase.ConnectionString, stocks, stockSymbols);
+            _clientManager = new ClientManager(ClientDatabase.ConnectionString, stocks, stockSymbols);
             foreach (var stock in stocks)
             {
                 comboBox2.Items.Add(stock);
@@ -186,7 +187,7 @@ namespace Trading.GUI
         {
             DateTime currentDate = new DateTime(2023, 9, 14);
             string stock = comboBox2.SelectedItem.ToString();
-            StockInfo stockinfo = new StockInfo(stock, connectionString, currentDate);
+            StockInfo stockinfo = new StockInfo(stock, _connectionString, currentDate);
             stockinfo.Show();
 
         }

@@ -47,6 +47,7 @@
             button3 = new Button();
             button4 = new Button();
             label11 = new Label();
+            label12 = new Label();
             SuspendLayout();
             // 
             // label2
@@ -228,11 +229,21 @@
             label11.Text = "Choose stock:";
             label11.Visible = false;
             // 
-            // Dashboard
+            // label12
+            // 
+            label12.AutoSize = true;
+            label12.Location = new Point(31, 37);
+            label12.Name = "label12";
+            label12.Size = new Size(58, 20);
+            label12.TabIndex = 21;
+            label12.Text = "label12";
+            // 
+            // ClientDashboard
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(796, 450);
+            Controls.Add(label12);
             Controls.Add(label11);
             Controls.Add(button4);
             Controls.Add(button3);
@@ -252,7 +263,7 @@
             Controls.Add(label4);
             Controls.Add(label3);
             Controls.Add(label2);
-            Name = "Dashboard";
+            Name = "ClientDashboard";
             Text = "Dashboard";
             Load += Dashboard_Load;
             ResumeLayout(false);
@@ -279,5 +290,6 @@
         private Button button3;
         private Button button4;
         private Label label11;
+        private Label label12;
     }
 }
