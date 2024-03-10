@@ -4,23 +4,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Trading.Library.Data;
 
 namespace Trading.Library
 {
     public class RiskAlgorithm
     {
         private Database _db;
-        private Dictionary<string, int> _portfolio = new Dictionary<string, int>(); // as of now, portfolio irrelevant. 
-        private decimal[,] _covarianceMatrix = new decimal[18,18];
-        private int[,] _convictionMatrix = new int[18,18];
-        private List<string> _allStocks;
-        private List<Individual> _population { get; set; }
-        private decimal _lambda { get; set; }
-        public RiskAlgorithm(Database db, List<string> allStocks, decimal lambda)
+        private decimal[,] _covarianceMatrix = new decimal[19,19];
+        private int[] _convictionMatrix = new int[19];
+        private List<string> _allStocks = StocksTextfileProcessor._stockSymbols;
+        public List<Individual> _population { get; private set; }
+        public Portfolio _portfolio { get; private set; }
+        public RiskAlgorithm(Database db, Portfolio portfolio)
         {
             _db = db;
-            _allStocks = allStocks;
-            _lambda = lambda;
+            _portfolio = portfolio;
             PopulateCovarianceMatrix();
             PopulateConvictionMatrix();
         }
@@ -29,7 +28,7 @@ namespace Trading.Library
         {
             _population = newPopulation;
         }
-        public void DisplayPopulation()
+        public void ConsoleDisplayPopulation()
         {
             foreach (Individual population in _population)
             {
@@ -38,6 +37,28 @@ namespace Trading.Library
                 Console.WriteLine(string.Join(",", stocks));
             }
             Console.WriteLine();
+        }
+        public List<int> GetBestChromosome()
+        {
+            decimal fitness = -1;
+            List<int> bestChromosome = new List<int>();
+            foreach (Individual individual in _population)
+            {
+                if (fitness == -1)
+                {
+                    fitness = individual._fitness;
+                    bestChromosome = individual._chromosome;
+                }
+                else
+                {
+                    if (individual._fitness < fitness)
+                    {
+                        fitness = individual._fitness;
+                        bestChromosome = individual._chromosome;
+                    }
+                }
+            }
+            return bestChromosome;
         }
         public List<decimal> CalcReturns(string stock)
         {
@@ -87,7 +108,7 @@ namespace Trading.Library
                 bool check = false;
                 while (check == false)
                 {
-                    List<int> indexes = GenerateRandomCombination(5, 18);
+                    List<int> indexes = GenerateRandomCombination(5, 19);
                     List<int> chromosome = new List<int>(new int[5]);
                     for (int y = 0; y < chromosome.Count; y ++)
                     {
@@ -121,12 +142,20 @@ namespace Trading.Library
         {
             for (int i = 0; i < _convictionMatrix.GetLength(0); i++)
             {
-                for (int y = 0; y < _convictionMatrix.GetLength(0); y++)
+                string stock = StocksTextfileProcessor._stockSymbols[i];
+                int index = _portfolio._stockSymbols.IndexOf(stock);
+                int conviction;
+                if (_portfolio._stockSymbols.Contains(stock))
+                {
+                    conviction = _portfolio._conviction[index];
+                    
+                }
+                else
                 {
                     Random rng = new Random();
-                    int num = rng.Next(60); //random num 1-5. 
-                    _convictionMatrix[i, y] = num;
+                    conviction = rng.Next(6); //random num 1-5.
                 }
+                _convictionMatrix[i] = conviction;
             }
         }
         public List<string> ConvertChromosomeToStocks(List<int> chromosome)
@@ -138,17 +167,27 @@ namespace Trading.Library
             }
             return stocks;
         }
-        public decimal CalcFitness(List<int> chromosome, decimal lambda)
+        public decimal CalcFitness(List<int> chromosome, decimal lambda = 0)
         {
             decimal fitness = 0;
             foreach (int index1 in chromosome)
             {
                 foreach (int index2 in chromosome)
                 {
-                    fitness += (_covarianceMatrix[index1,index2] - (lambda*_convictionMatrix[index1,index2]));
+                    decimal portfolioConviction = 
+                    fitness += (_covarianceMatrix[index1,index2] - (lambda*GetPortfolioConviction(chromosome)));
                 }
             }
             return fitness;
+        }
+        public decimal GetPortfolioConviction(List<int> chromosome)
+        {
+            decimal portfolioConviction = 0;
+            foreach (int index in chromosome)
+            {
+                portfolioConviction += _convictionMatrix[index];
+            }
+            return portfolioConviction / chromosome.Count();
         }
         public List<int> Crossover(List<int> chromosome1, List<int> chromosome2)
         {
@@ -193,7 +232,7 @@ namespace Trading.Library
             return true;
         }
 
-        public void Generation() //population is initially set to GenerateRandomPortfolios()
+        public void Generation(decimal lambda) //population is initially set to GenerateRandomPortfolios()
         { //!! is recursion possible here? yes. GPT:
           //As previously mentioned, recursion is not a natural fit for the iterative nature of genetic algorithms.
           ////Iterative approaches, like the one you're using with a loop,
@@ -213,7 +252,7 @@ namespace Trading.Library
                     List<int> childChromosome = Crossover(chromosome1._chromosome, chromosome2._chromosome);
                     if (childChromosome.Count == 5)
                     {
-                        decimal childFitness = CalcFitness(childChromosome,_lambda);
+                        decimal childFitness = CalcFitness(childChromosome,lambda);
                         Individual child = new Individual(childChromosome, childFitness);
                         _population[_population.Count - 1] = child; //replacing lowest performer with child.
                         checkRandomCrossover = true;
@@ -221,5 +260,45 @@ namespace Trading.Library
                 }
             }
         }
+        public void ExecuteAlgorithm(decimal lambda = 0)
+        {
+
+            //RiskAlgorithm algo = new RiskAlgorithm(db, lambda, _portfolio);
+            List<List<int>> chromosomes = GenerateRandomPortfolios();
+            List<Individual> individuals = new List<Individual>();
+            foreach (List<int> chromosome in chromosomes)
+            {
+                decimal fitness = CalcFitness(chromosome, lambda);
+                Individual val = new Individual(chromosome, fitness);
+                individuals.Add(val);
+            }
+            UpdatePopulation(individuals);
+            for (int i = 0; i < 2000; i++)
+            {
+                /*if (i == 100)
+                {
+                    algo.DisplayPopulation();
+                }
+                else if (i == 200)
+                {
+                    algo.DisplayPopulation();
+                }
+                else if (i == 400)
+                {
+                    algo.DisplayPopulation();
+                }
+                else if (i == 600)
+                {
+                    algo.DisplayPopulation();
+                }*/
+
+                Generation(lambda);
+                if (CheckPopulationConvergence())
+                {
+                    break;
+                }
+            }
+        }
+
     }
 }

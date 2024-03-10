@@ -46,23 +46,28 @@ namespace Trading.Library
 
             }
         }
-        public static Dictionary<string,int> ClientPortfolio(int clientid)
+        public static Portfolio ClientPortfolio(int clientid)
         {
-            Dictionary<string,int> portfolio = new Dictionary<string, int>();
+            List<string> stockSymbols = new List<string>();
+            List<int> quantities = new List<int>();
+            List<int> convictions = new List<int>();
             using (SqliteConnection connection = new SqliteConnection())
             {
                 connection.ConnectionString = _connectionString;
                 connection.Open();
                 SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "select StockName,Quantity from Client_Holdings where ClientID = @ClientID";
+                command.CommandText = "select StockSymbol,Quantity,Conviction from Client_Holdings where ClientID = @ClientID";
                 var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
                 clientIDParameter.Value = clientid;
                 var dataReader = command.ExecuteReader();
                 while (dataReader.Read())
                 {
-                    portfolio.Add(dataReader.GetString(0),dataReader.GetInt16(1));
+                    stockSymbols.Add(dataReader.GetString(0));
+                    quantities.Add(dataReader.GetInt16(1));
+                    convictions.Add(dataReader.GetInt16(2));
                 }
             }
+            Portfolio portfolio = new Portfolio(stockSymbols, quantities, convictions);
             return portfolio;
         }
         public static int NextAvailableClientID()
@@ -112,7 +117,7 @@ namespace Trading.Library
             return clients;
         }
 
-        public static List<string> GetStockSymbol(int clientID)
+        public static List<string> GetStockSymbols(int clientID)
         {
             List<string> stockSymbols = new List<string>();
             using (SqliteConnection connection = new SqliteConnection())
@@ -120,7 +125,7 @@ namespace Trading.Library
                 connection.ConnectionString = _connectionString;
                 connection.Open();
                 SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "select s.StockName from Client_Holdings c join Stocks s on c.StockName = s.StockName where ClientID = @ClientID";
+                command.CommandText = "select s.StockName from Stocks s join Client_Holdings c on c.StockSymbol = s.StockSymbol where ClientID = @ClientID";
                 var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
                 clientIDParameter.Value = clientID;
                 var dataReader = command.ExecuteReader();
@@ -133,20 +138,22 @@ namespace Trading.Library
             return stockSymbols;
 
         }
-        public static void AddStock(int clientid, string stock, int quantity) //first need to check if portfolio is full
+        public static void AddStock(int clientid, string stock, int quantity, int conviction) //first need to check if portfolio is full
         {
             using (SqliteConnection connection = new SqliteConnection())
             {
                 connection.ConnectionString = _connectionString;
                 connection.Open();
                 SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "insert into Client_Holdings values (@ClientID,@StockSymbol,@Quantity)";
+                command.CommandText = "insert into Client_Holdings values (@ClientID,@StockSymbol,@Quantity,@Conviction)";
                 var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
                 clientIDParameter.Value = clientid;
                 var stockSymbolParameter = command.Parameters.Add("@StockSymbol", SqliteType.Text);
                 stockSymbolParameter.Value = stock;
                 var quantityParameter = command.Parameters.Add("@Quantity", SqliteType.Text);
                 quantityParameter.Value = quantity;
+                var convictionParameter = command.Parameters.Add("@Conviction", SqliteType.Text);
+                convictionParameter.Value = conviction;
                 command.ExecuteNonQuery();
                 Console.WriteLine($"Successfully added addded {stock} to your portfolio");
             }
@@ -158,7 +165,7 @@ namespace Trading.Library
                 connection.ConnectionString = _connectionString;
                 connection.Open();
                 SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "delete from Client_Holdings where ClientID = @ClientID and StockName = @Stock";
+                command.CommandText = "delete from Client_Holdings where ClientID = @ClientID and StockSymbol = @Stock";
                 var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
                 clientIDParameter.Value = clientid;
                 var stockNameParameter = command.Parameters.Add("@Stock", SqliteType.Text);
@@ -223,7 +230,7 @@ namespace Trading.Library
                 connection.ConnectionString = _connectionString;
                 connection.Open();
                 SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "update Client_Holdings set Quantity = @Shares where ClientID = @ClientID and StockName = @Stock";
+                command.CommandText = "update Client_Holdings set Quantity = @Shares where ClientID = @ClientID and StockSymbol = @Stock";
                 var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
                 clientIDParameter.Value = clientid;
                 var stockParameter = command.Parameters.Add("@Stock", SqliteType.Text);
@@ -241,7 +248,7 @@ namespace Trading.Library
                 connection.ConnectionString = _connectionString;
                 connection.Open();
                 SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "select Quantity from Client_Holdings where ClientID = @ClientID and StockName = @Stock";
+                command.CommandText = "select Quantity from Client_Holdings where ClientID = @ClientID and StockSymbol = @Stock";
                 var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
                 clientIDParameter.Value = clientid;
                 var stockParameter = command.Parameters.Add("@Stock", SqliteType.Text);

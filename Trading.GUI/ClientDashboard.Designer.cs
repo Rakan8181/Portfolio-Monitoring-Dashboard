@@ -48,31 +48,51 @@
             button4 = new Button();
             label11 = new Label();
             label12 = new Label();
+            label13 = new Label();
+            textBox4 = new TextBox();
+            button5 = new Button();
+            label14 = new Label();
+            label15 = new Label();
+            label16 = new Label();
+            label17 = new Label();
+            label18 = new Label();
+            LowPortfolio = new Label();
+            MediumPortfolio = new Label();
+            HighPortfolio = new Label();
+            label19 = new Label();
+            label20 = new Label();
+            HighRisk = new Label();
+            HighConviction = new Label();
+            label24 = new Label();
+            LowRisk = new Label();
+            MediumRisk = new Label();
+            MediumConviction = new Label();
+            LowConviction = new Label();
             SuspendLayout();
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(36, 93);
+            label2.Location = new Point(20, 71);
             label2.Name = "label2";
-            label2.Size = new Size(51, 20);
+            label2.Size = new Size(111, 20);
             label2.TabIndex = 2;
-            label2.Text = "Stocks";
+            label2.Text = "Stocks Symbols";
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(36, 157);
+            label3.Location = new Point(20, 138);
             label3.Name = "label3";
-            label3.Size = new Size(65, 20);
+            label3.Size = new Size(95, 20);
             label3.TabIndex = 3;
-            label3.Text = "Symbols";
+            label3.Text = "Stock Names";
             label3.Click += label3_Click;
             // 
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(132, 93);
+            label4.Location = new Point(132, 77);
             label4.Name = "label4";
             label4.Size = new Size(50, 20);
             label4.TabIndex = 4;
@@ -82,7 +102,7 @@
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(132, 157);
+            label5.Location = new Point(132, 138);
             label5.Name = "label5";
             label5.Size = new Size(50, 20);
             label5.TabIndex = 5;
@@ -121,9 +141,9 @@
             label1.AutoSize = true;
             label1.Location = new Point(26, 202);
             label1.Name = "label1";
-            label1.Size = new Size(89, 20);
+            label1.Size = new Size(105, 20);
             label1.TabIndex = 9;
-            label1.Text = "Stock Name";
+            label1.Text = "Stock Symbols";
             // 
             // label7
             // 
@@ -144,7 +164,7 @@
             // label8
             // 
             label8.AutoSize = true;
-            label8.Location = new Point(37, 126);
+            label8.Location = new Point(20, 106);
             label8.Name = "label8";
             label8.Size = new Size(52, 20);
             label8.TabIndex = 12;
@@ -153,7 +173,7 @@
             // label9
             // 
             label9.AutoSize = true;
-            label9.Location = new Point(132, 126);
+            label9.Location = new Point(132, 106);
             label9.Name = "label9";
             label9.Size = new Size(50, 20);
             label9.TabIndex = 13;
@@ -181,7 +201,7 @@
             // 
             // textBox3
             // 
-            textBox3.Location = new Point(684, 195);
+            textBox3.Location = new Point(684, 185);
             textBox3.Name = "textBox3";
             textBox3.Size = new Size(70, 27);
             textBox3.TabIndex = 16;
@@ -232,17 +252,216 @@
             // label12
             // 
             label12.AutoSize = true;
-            label12.Location = new Point(31, 37);
+            label12.Location = new Point(20, 41);
             label12.Name = "label12";
             label12.Size = new Size(58, 20);
             label12.TabIndex = 21;
             label12.Text = "label12";
+            // 
+            // label13
+            // 
+            label13.AutoSize = true;
+            label13.Location = new Point(265, 202);
+            label13.Name = "label13";
+            label13.Size = new Size(108, 20);
+            label13.TabIndex = 22;
+            label13.Text = "Conviction: 1-5";
+            // 
+            // textBox4
+            // 
+            textBox4.Location = new Point(265, 225);
+            textBox4.Name = "textBox4";
+            textBox4.Size = new Size(99, 27);
+            textBox4.TabIndex = 23;
+            // 
+            // button5
+            // 
+            button5.Location = new Point(261, 268);
+            button5.Name = "button5";
+            button5.Size = new Size(103, 63);
+            button5.TabIndex = 24;
+            button5.Text = "Remove Stock";
+            button5.UseVisualStyleBackColor = true;
+            button5.Click += button5_Click;
+            // 
+            // label14
+            // 
+            label14.AutoSize = true;
+            label14.Location = new Point(20, 169);
+            label14.Name = "label14";
+            label14.Size = new Size(79, 20);
+            label14.TabIndex = 25;
+            label14.Text = "Conviction";
+            // 
+            // label15
+            // 
+            label15.AutoSize = true;
+            label15.Location = new Point(132, 169);
+            label15.Name = "label15";
+            label15.Size = new Size(58, 20);
+            label15.TabIndex = 26;
+            label15.Text = "label15";
+            // 
+            // label16
+            // 
+            label16.AutoSize = true;
+            label16.Location = new Point(148, 337);
+            label16.Name = "label16";
+            label16.Size = new Size(66, 20);
+            label16.TabIndex = 27;
+            label16.Text = "Low Risk";
+            // 
+            // label17
+            // 
+            label17.AutoSize = true;
+            label17.Location = new Point(343, 334);
+            label17.Name = "label17";
+            label17.Size = new Size(94, 20);
+            label17.TabIndex = 28;
+            label17.Text = "Medium Risk";
+            // 
+            // label18
+            // 
+            label18.AutoSize = true;
+            label18.Location = new Point(591, 334);
+            label18.Name = "label18";
+            label18.Size = new Size(71, 20);
+            label18.TabIndex = 29;
+            label18.Text = "High Risk";
+            // 
+            // LowPortfolio
+            // 
+            LowPortfolio.AutoSize = true;
+            LowPortfolio.Location = new Point(148, 357);
+            LowPortfolio.Name = "LowPortfolio";
+            LowPortfolio.Size = new Size(58, 20);
+            LowPortfolio.TabIndex = 30;
+            LowPortfolio.Text = "label19";
+            // 
+            // MediumPortfolio
+            // 
+            MediumPortfolio.AutoSize = true;
+            MediumPortfolio.Location = new Point(343, 357);
+            MediumPortfolio.Name = "MediumPortfolio";
+            MediumPortfolio.Size = new Size(58, 20);
+            MediumPortfolio.TabIndex = 31;
+            MediumPortfolio.Text = "label19";
+            // 
+            // HighPortfolio
+            // 
+            HighPortfolio.AutoSize = true;
+            HighPortfolio.Location = new Point(591, 357);
+            HighPortfolio.Name = "HighPortfolio";
+            HighPortfolio.Size = new Size(58, 20);
+            HighPortfolio.TabIndex = 32;
+            HighPortfolio.Text = "label19";
+            // 
+            // label19
+            // 
+            label19.AutoSize = true;
+            label19.Location = new Point(26, 368);
+            label19.Name = "label19";
+            label19.Size = new Size(73, 20);
+            label19.TabIndex = 33;
+            label19.Text = "Portfolio: ";
+            // 
+            // label20
+            // 
+            label20.AutoSize = true;
+            label20.Location = new Point(26, 388);
+            label20.Name = "label20";
+            label20.Size = new Size(42, 20);
+            label20.TabIndex = 34;
+            label20.Text = "Risk: ";
+            // 
+            // HighRisk
+            // 
+            HighRisk.AutoSize = true;
+            HighRisk.Location = new Point(591, 388);
+            HighRisk.Name = "HighRisk";
+            HighRisk.Size = new Size(58, 20);
+            HighRisk.TabIndex = 36;
+            HighRisk.Text = "label22";
+            // 
+            // HighConviction
+            // 
+            HighConviction.AutoSize = true;
+            HighConviction.Location = new Point(591, 415);
+            HighConviction.Name = "HighConviction";
+            HighConviction.Size = new Size(58, 20);
+            HighConviction.TabIndex = 37;
+            HighConviction.Text = "label23";
+            // 
+            // label24
+            // 
+            label24.AutoSize = true;
+            label24.Location = new Point(26, 415);
+            label24.Name = "label24";
+            label24.Size = new Size(86, 20);
+            label24.TabIndex = 38;
+            label24.Text = "Conviction: ";
+            // 
+            // LowRisk
+            // 
+            LowRisk.AutoSize = true;
+            LowRisk.Location = new Point(148, 388);
+            LowRisk.Name = "LowRisk";
+            LowRisk.Size = new Size(58, 20);
+            LowRisk.TabIndex = 39;
+            LowRisk.Text = "label25";
+            // 
+            // MediumRisk
+            // 
+            MediumRisk.AutoSize = true;
+            MediumRisk.Location = new Point(343, 388);
+            MediumRisk.Name = "MediumRisk";
+            MediumRisk.Size = new Size(58, 20);
+            MediumRisk.TabIndex = 40;
+            MediumRisk.Text = "label26";
+            // 
+            // MediumConviction
+            // 
+            MediumConviction.AutoSize = true;
+            MediumConviction.Location = new Point(343, 415);
+            MediumConviction.Name = "MediumConviction";
+            MediumConviction.Size = new Size(58, 20);
+            MediumConviction.TabIndex = 41;
+            MediumConviction.Text = "label27";
+            // 
+            // LowConviction
+            // 
+            LowConviction.AutoSize = true;
+            LowConviction.Location = new Point(148, 415);
+            LowConviction.Name = "LowConviction";
+            LowConviction.Size = new Size(58, 20);
+            LowConviction.TabIndex = 42;
+            LowConviction.Text = "label28";
             // 
             // ClientDashboard
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(796, 450);
+            Controls.Add(LowConviction);
+            Controls.Add(MediumConviction);
+            Controls.Add(MediumRisk);
+            Controls.Add(LowRisk);
+            Controls.Add(label24);
+            Controls.Add(HighConviction);
+            Controls.Add(HighRisk);
+            Controls.Add(label20);
+            Controls.Add(label19);
+            Controls.Add(HighPortfolio);
+            Controls.Add(MediumPortfolio);
+            Controls.Add(LowPortfolio);
+            Controls.Add(label18);
+            Controls.Add(label17);
+            Controls.Add(label16);
+            Controls.Add(label15);
+            Controls.Add(label14);
+            Controls.Add(button5);
+            Controls.Add(textBox4);
+            Controls.Add(label13);
             Controls.Add(label12);
             Controls.Add(label11);
             Controls.Add(button4);
@@ -291,5 +510,25 @@
         private Button button4;
         private Label label11;
         private Label label12;
+        private Label label13;
+        private TextBox textBox4;
+        private Button button5;
+        private Label label14;
+        private Label label15;
+        private Label label16;
+        private Label label17;
+        private Label label18;
+        private Label LowPortfolio;
+        private Label MediumPortfolio;
+        private Label HighPortfolio;
+        private Label label19;
+        private Label label20;
+        private Label HighRisk;
+        private Label HighConviction;
+        private Label label24;
+        private Label LowRisk;
+        private Label MediumRisk;
+        private Label MediumConviction;
+        private Label LowConviction;
     }
 }

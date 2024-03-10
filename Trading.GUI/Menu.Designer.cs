@@ -136,7 +136,7 @@
             comboBox2.Location = new Point(25, 311);
             comboBox2.Name = "comboBox2";
             comboBox2.Size = new Size(267, 28);
-            comboBox2.TabIndex = 18;
+            comboBox2.TabIndex = 19;
             comboBox2.SelectedIndexChanged += comboBox2_SelectedIndexChanged;
             // 
             // Form1

@@ -22,7 +22,7 @@ namespace Trading.Library.Clients
             this.ftse100 = ftse100;
             this.ftse100Symbols = ftse100Symbols;
         }
-        public void Menu()
+/*        public void Menu()
         {
 
             bool check = false;
@@ -53,7 +53,7 @@ namespace Trading.Library.Clients
 
                     bool check1 = false;
                     int clientid = GetClientID();
-                    Dictionary<string, int> portfolio = ClientDatabase.ClientPortfolio(clientid);
+                    Portfolio portfolio = ClientDatabase.ClientPortfolio(clientid);
 
                     while (check1 == false)
                     {
@@ -67,7 +67,7 @@ namespace Trading.Library.Clients
                         {
                             Console.WriteLine(string.Join(",", portfolio.Keys.ToList()));
                             Console.WriteLine(string.Join(",", portfolio.Values.ToList()));
-                            List<string> symbols = ClientDatabase.GetStockSymbol(clientid);
+                            List<string> symbols = ClientDatabase.GetStockNames(clientid);
                             Console.WriteLine(string.Join(",", symbols));
                             //Console.WriteLine("Stock Symbols: " + symbols);
                             //Console.WriteLine("Stock Names: " + portfolio); check1 = true;
@@ -100,7 +100,7 @@ namespace Trading.Library.Clients
                                         }
 
                                     }
-                                    ClientDatabase.AddStock(clientid, stock, quantity);
+                                    ClientDatabase.AddStock(clientid, stock, quantity, conviction);
 
                                 }
                                 else if (stock == "")
@@ -187,7 +187,7 @@ namespace Trading.Library.Clients
 
             }
 
-        }
+        }*/
 //this needs to be in program.cs for console
 /*        public void AddUserStockChoices(string firstName, string secondName)
         {

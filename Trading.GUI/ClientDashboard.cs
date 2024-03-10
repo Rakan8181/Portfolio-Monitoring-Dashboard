@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Trading.Library;
 using Trading.Library.Data;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace Trading.GUI
 {
@@ -17,38 +18,50 @@ namespace Trading.GUI
     {
         public Client client;
         public string connectionstring = "Data Source=C:\\Users\\44734\\source\\NEA\\Company Database.db;Mode=ReadWrite;";
-        List<string> stockSymbols = new List<string>
-        {
-            "MSFT", "AAPL", "NVDA", "AMZN", "META", "GOOGL", "GOOG", "BRK.B", "AVGO", "LLY",
-            "TSLA", "JPM", "UNH", "V", "XOM", "MA", "JNJ", "PG", "HD", "MRK",
-            "COST", "ABBV", "ADBE", "CRM", "AMD", "CVX", "NFLX", "WMT", "KO", "PEP",
-            "ACN", "BAC", "MCD", "TMO", "CSCO", "ABT", "LIN", "CMCSA", "ORCL", "INTC",
-            "VZ", "DIS", "INTU", "WFC", "AMGN", "IBM", "DHR", "NOW", "QCOM", "CAT",
-            "PFE", "UNP", "SPGI", "GE", "TXN", "PM", "AMAT", "UBER", "ISRG", "RTX",
-            "COP", "HON", "T", "LOW", "GS", "NKE", "BKNG", "NEE", "PLD", "BA",
-            "MDT", "AXP", "ELV", "SYK", "VRTX", "TJX", "BLK", "MS", "LRCX", "SBUX",
-            "C", "ETN", "PANW", "DE", "PGR", "MDLZ", "UPS", "REGN", "ADP", "CB",
-            "BMY", "GILD", "ADI", "MMC", "BSX", "CVS", "LMT", "MU", "SCHW", "AMT"
-        };
-        public ClientDashboard(Client _client)
+        // private Dictionary<string, int> _portfolio;
+        public Portfolio _portfolio;
+        private Database _db;
+
+        public ClientDashboard(Client _client, Database db)
         {
             InitializeComponent();
             client = _client;
+            _db = db;
+            label12.Text = string.Join(",", StocksTextfileProcessor._stockSymbols);
+            _portfolio = ClientDatabase.ClientPortfolio(client.clientid); // change this so it return a Portfolio class
         }
 
         private void Dashboard_Load(object sender, EventArgs e)
         {
 
-            Dictionary<string, int> portfolio = ClientDatabase.ClientPortfolio(client.clientid);
-            label4.Text = string.Join(",", portfolio.Keys.ToList());
-            List<string> symbols = ClientDatabase.GetStockSymbol(client.clientid);
-            label5.Text = string.Join(",", symbols);
+            // Dictionary<string, int> portfolio = ClientDatabase.ClientPortfolio(client.clientid);
+            label4.Text = string.Join(", ", _portfolio._stockSymbols);
+            List<string> stockNames = ClientDatabase.GetStockSymbols(client.clientid);
+            label5.Text = string.Join(", ", stockNames);
             label6.Text = client.firstName + " " + client.secondName + "'s Dashboard";
-            label9.Text = string.Join(",", portfolio.Values.ToList());
-            foreach (string stock in portfolio.Keys)
+            label9.Text = string.Join(", ", _portfolio._quantity);
+            label15.Text = string.Join(",", _portfolio._conviction);
+            foreach (string stock in _portfolio._stockSymbols)
             {
                 comboBox1.Items.Add(stock);
             }
+            DisplayRiskAlgorithm();
+        }
+        private void DisplayRiskAlgorithm()
+        {
+            RiskAlgorithm riskAlgorithm = new RiskAlgorithm(_db, _portfolio);
+            riskAlgorithm.ExecuteAlgorithm(); //guarantees convergence??
+            List<int> chromosome = riskAlgorithm.GetBestChromosome();
+            LowPortfolio.Text = string.Join(",", riskAlgorithm.ConvertChromosomeToStocks(chromosome));
+            LowRisk.Text = Math.Round(riskAlgorithm.CalcFitness(chromosome),4).ToString();
+            LowConviction.Text = riskAlgorithm.GetPortfolioConviction(chromosome).ToString();
+
+            decimal lambda = 1;
+            riskAlgorithm.ExecuteAlgorithm(lambda); //guarantees convergence??
+            chromosome = riskAlgorithm.GetBestChromosome();
+            MediumPortfolio.Text = string.Join(",", riskAlgorithm.ConvertChromosomeToStocks(chromosome));
+            MediumRisk.Text = Math.Round(riskAlgorithm.CalcFitness(chromosome), 4).ToString();
+            MediumConviction.Text = riskAlgorithm.GetPortfolioConviction(chromosome).ToString();
         }
         private void label6_Click(object sender, EventArgs e)
         {
@@ -72,29 +85,48 @@ namespace Trading.GUI
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Dictionary<string, int> portfolio = ClientDatabase.ClientPortfolio(client.clientid);
+            Portfolio portfolio = ClientDatabase.ClientPortfolio(client.clientid);
             string stock = textBox1.Text;
             string inputShares = textBox2.Text;
-            if (portfolio.ContainsKey(stock))
+            string userConviction = textBox4.Text;
+            if (int.TryParse(userConviction, out int conviction))
             {
-                MessageBox.Show("This stock is already in your portfolio");
-            }
-            else if (!stockSymbols.Contains(stock))
-            {
-                MessageBox.Show("Invalid stock: not in FTSE100");
-            }
-            else
-            {
-                if (!int.TryParse(inputShares, out int shares))
+                if (conviction > 5 || conviction < 1)
                 {
-                    MessageBox.Show("Enter an integer number of shares");
+                    MessageBox.Show("Conviction level must be between 1 and 5");
                 }
                 else
                 {
-                    ClientDatabase.AddStock(client.clientid, stock, shares);
-                    MessageBox.Show($"{shares} shares in {stock} has been added to your portfolio");
+                    if (portfolio._stockSymbols.Contains(stock))
+                    {
+                        MessageBox.Show("This stock is already in your portfolio");
+                    }
+                    else if (!StocksTextfileProcessor._stockSymbols.Contains(stock))
+                    {
+                        MessageBox.Show("Invalid stock: not in FTSE100");
+                    }
+                    else
+                    {
+                        if (!int.TryParse(inputShares, out int shares))
+                        {
+                            MessageBox.Show("Enter an integer number of shares");
+                        }
+                        else
+                        {
+                            ClientDatabase.AddStock(client.clientid, stock, shares, conviction);
+                            MessageBox.Show($"{shares} shares in {stock} has been added to your portfolio at a conviction level of: {conviction}");
+                            ResetForm();
+                        }
+                    }
                 }
+
             }
+            else
+            {
+                MessageBox.Show("Conviction level must be an integer");
+            }
+
+
         }
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -175,10 +207,28 @@ namespace Trading.GUI
         private void ResetForm()
         {
             comboBox1.Items.Clear();
-
-
+            _portfolio = ClientDatabase.ClientPortfolio(client.clientid);
             Dashboard_Load(this, EventArgs.Empty);
         }
 
+        private void button5_Click(object sender, EventArgs e)
+        {
+            string stock = textBox1.Text;
+            if (_portfolio._stockSymbols.Contains(stock))
+            {
+                ClientDatabase.ClientRemovesStock(client.clientid, stock);
+                MessageBox.Show($"Successfully removed {stock} from your portfolio");
+                ResetForm();
+            }
+            else
+            {
+                MessageBox.Show("This stock is not in your portfolio");
+            }
+        }
+
+        private void label21_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

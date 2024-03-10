@@ -127,7 +127,7 @@ namespace Trading.GUI
             string secondname = textBox2.Text;
             int clientid = ClientDatabase.GetClientID(firstname, secondname);
             GoldClient client = new GoldClient(clientid, firstname, secondname);
-            ClientDashboard dashboard = new ClientDashboard(client);
+            ClientDashboard dashboard = new ClientDashboard(client,_db);
             dashboard.Show();
         }
 
@@ -174,7 +174,7 @@ namespace Trading.GUI
             string secondname = name.Substring(indexSpace + 1);
             int clientid = ClientDatabase.GetClientID(firstname, secondname);
             GoldClient client = new GoldClient(clientid, firstname, secondname);
-            ClientDashboard dashboard = new ClientDashboard(client);
+            ClientDashboard dashboard = new ClientDashboard(client, _db);
             dashboard.Show();
         }
         private void ResetForm()
