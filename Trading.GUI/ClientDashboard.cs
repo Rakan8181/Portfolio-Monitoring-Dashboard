@@ -5,6 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -22,73 +23,61 @@ namespace Trading.GUI
         public Portfolio _portfolio;
         private Database _db;
 
+
         public ClientDashboard(Client _client, Database db)
         {
             InitializeComponent();
             client = _client;
             _db = db;
-            label12.Text = string.Join(",", StocksTextfileProcessor._stockSymbols);
             _portfolio = ClientDatabase.ClientPortfolio(client.clientid); // change this so it return a Portfolio class
         }
 
         private void Dashboard_Load(object sender, EventArgs e)
         {
 
-            // Dictionary<string, int> portfolio = ClientDatabase.ClientPortfolio(client.clientid);
-            label4.Text = string.Join(", ", _portfolio._stockSymbols);
-            List<string> stockNames = ClientDatabase.GetStockSymbols(client.clientid);
-            label5.Text = string.Join(", ", stockNames);
-            label6.Text = client.firstName + " " + client.secondName + "'s Dashboard";
-            label9.Text = string.Join(", ", _portfolio._quantity);
-            label15.Text = string.Join(",", _portfolio._conviction);
+            StocksSymbolsLabel.Text = string.Join(", ", _portfolio._stockSymbols);
+            List<string> stockNames = ClientDatabase.GetStockNames(client.clientid);
+            StockNamesLabel.Text = string.Join(", ", stockNames);
+            ClientDashboardLabel.Text = client.firstName + " " + client.secondName + "'s Dashboard";
+            SharesLabel.Text = string.Join(", ", _portfolio._quantity);
+            ConvictionLabel.Text = string.Join(",", _portfolio._conviction);
+            CurrentPortfolioRiskLabel.Text = CalculateCurrentPortfolioRisk().ToString();
             foreach (string stock in _portfolio._stockSymbols)
             {
                 comboBox1.Items.Add(stock);
             }
             DisplayRiskAlgorithm();
         }
+        public decimal CalculateCurrentPortfolioRisk()
+        {
+            RiskAlgorithm riskAlgorithm = new RiskAlgorithm(_db, _portfolio);
+            List<int> portfolioChromosome = riskAlgorithm.ConvertStocksToChromosome(_portfolio._stockSymbols);
+            decimal risk = Math.Round(riskAlgorithm.CalcFitness(portfolioChromosome), 6);
+            return risk;
+        }
         private void DisplayRiskAlgorithm()
         {
             RiskAlgorithm riskAlgorithm = new RiskAlgorithm(_db, _portfolio);
-            riskAlgorithm.ExecuteAlgorithm(); //guarantees convergence??
+            riskAlgorithm.ExecuteAlgorithm(); //does not guarantee convergence. 
             List<int> chromosome = riskAlgorithm.GetBestChromosome();
-            LowPortfolio.Text = string.Join(",", riskAlgorithm.ConvertChromosomeToStocks(chromosome));
-            LowRisk.Text = Math.Round(riskAlgorithm.CalcFitness(chromosome),4).ToString();
-            LowConviction.Text = riskAlgorithm.GetPortfolioConviction(chromosome).ToString();
+            LeastRiskPortfolioLabel.Text = string.Join(",", riskAlgorithm.ConvertChromosomeToStocks(chromosome));
+            LeastRiskLabel.Text = Math.Round(riskAlgorithm.CalcFitness(chromosome), 5).ToString();
+            LeastRiskConvictionLabel.Text = riskAlgorithm.GetPortfolioConviction(chromosome).ToString();
 
             decimal lambda = 1;
-            riskAlgorithm.ExecuteAlgorithm(lambda); //guarantees convergence??
+            riskAlgorithm.ExecuteAlgorithm(lambda);
             chromosome = riskAlgorithm.GetBestChromosome();
             MediumPortfolio.Text = string.Join(",", riskAlgorithm.ConvertChromosomeToStocks(chromosome));
-            MediumRisk.Text = Math.Round(riskAlgorithm.CalcFitness(chromosome), 4).ToString();
+            MediumRisk.Text = Math.Round(riskAlgorithm.CalcFitness(chromosome), 5).ToString();
             MediumConviction.Text = riskAlgorithm.GetPortfolioConviction(chromosome).ToString();
         }
-        private void label6_Click(object sender, EventArgs e)
-        {
 
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void progressBar1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void button1_Click(object sender, EventArgs e)
+        private void AddStockButtonClick(object sender, EventArgs e)
         {
             Portfolio portfolio = ClientDatabase.ClientPortfolio(client.clientid);
-            string stock = textBox1.Text;
+            string stock = StockSymbolTextbox.Text;
             string inputShares = textBox2.Text;
-            string userConviction = textBox4.Text;
+            string userConviction = ConvictionTextbox.Text;
             if (int.TryParse(userConviction, out int conviction))
             {
                 if (conviction > 5 || conviction < 1)
@@ -128,33 +117,19 @@ namespace Trading.GUI
 
 
         }
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
 
-        }
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void button4_Click(object sender, EventArgs e) //remove shares
+        private void RemoveSharesButton(object sender, EventArgs e) //remove shares
         {
             string inputShares = textBox3.Text;
             ChangeShares(inputShares, true);
             ResetForm();
         }
 
-        private void button3_Click(object sender, EventArgs e) //add shares
+        private void AddSharesButton(object sender, EventArgs e) //add shares
         {
             string inputShares = textBox3.Text;
             ChangeShares(inputShares, false);
             ResetForm();
-
         }
         private void ChangeShares(string inputShares, bool negative)
         {
@@ -195,25 +170,17 @@ namespace Trading.GUI
             }
         }
 
-        private void button2_Click_1(object sender, EventArgs e) //update number of shares button 
-        {
-            label11.Visible = true;
-            comboBox1.Visible = true;
-            label10.Visible = true;
-            textBox3.Visible = true;
-            button3.Visible = true;
-            button4.Visible = true;
-        }
-        private void ResetForm()
-        {
-            comboBox1.Items.Clear();
-            _portfolio = ClientDatabase.ClientPortfolio(client.clientid);
-            Dashboard_Load(this, EventArgs.Empty);
-        }
 
-        private void button5_Click(object sender, EventArgs e)
+private void ResetForm() //called when client makes change via interface; first makes changes to the database, then this method is called, to reset _portfolio
+{
+    comboBox1.Items.Clear();
+    _portfolio = ClientDatabase.ClientPortfolio(client.clientid); //_portfolio updated to changes made to database
+    Dashboard_Load(this, EventArgs.Empty);
+}
+
+        private void RemovedStockButtonClick(object sender, EventArgs e)
         {
-            string stock = textBox1.Text;
+            string stock = StockSymbolTextbox.Text;
             if (_portfolio._stockSymbols.Contains(stock))
             {
                 ClientDatabase.ClientRemovesStock(client.clientid, stock);
@@ -226,9 +193,5 @@ namespace Trading.GUI
             }
         }
 
-        private void label21_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }

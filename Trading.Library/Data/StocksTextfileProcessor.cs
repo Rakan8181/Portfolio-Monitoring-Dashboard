@@ -6,16 +6,18 @@ using System.Threading.Tasks;
 
 namespace Trading.Library.Data
 {
-    public class StocksTextfileProcessor
+    public static class StocksTextfileProcessor
     {
         public static List<string> _stockNames { get; private set; }
         public static List<string> _stockSymbols { get; private set; }
+        private static string _stockNamesPath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\SandP500Stocks.txt";
+        private static string _stockSymbolsPath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\SandP500StocksSymbols.txt";
 
         // Static constructor to initialize the list
         static StocksTextfileProcessor()
         {
-            LoadSymbols("C:\\Users\\44734\\source\\NEA\\Trading-App\\SandP500StocksSymbols.txt");
-            LoadNames("C:\\Users\\44734\\source\\NEA\\Trading-App\\SandP500Stocks.txt");
+            LoadSymbols(_stockSymbolsPath);
+            LoadNames(_stockNamesPath);
 
         }
 

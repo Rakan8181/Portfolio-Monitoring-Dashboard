@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
+using OxyPlot.Series;
+using OxyPlot;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -11,30 +13,81 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
 using Trading.Library;
+using OxyPlot;
+using OxyPlot.Series;
+using System.Linq.Expressions;
+using OxyPlot.Axes;
+using Trading.Library.Data;
 
 namespace Trading.GUI
 {
     public partial class StockInfo : Form
     {
+        //            LatestPriceLabel.Text = LatestPrice(_currentDate, _stock).ToString();
         public string _stock;
         private string _connectionString;
-        private Database db;
+        private Database _db;
         private DateTime _currentDate;
-
-        public StockInfo(string stock, string connectionString, DateTime currentDate)
+        private DateTime _oldestDate;
+        //constructor is called only once, when a new instance of the form is created and is not called again unless a new instance of the form is created. 
+        public StockInfo(string stock, string connectionString, DateTime currentDate, DateTime oldestDate)
         {
-            InitializeComponent();
-            InitializeDataComboBox();
             _stock = stock;
             _currentDate = currentDate;
-            label1.Text = _stock;
             _connectionString = connectionString;
-            db = new Database(connectionString);
+            _oldestDate = oldestDate;
 
+            _db = new Database(_connectionString);
+            InitializeComponent();
 
+        }
+        //can be called again based on user changes to form, constructor cannot. 
+        private void StockInfo_Load(object sender, EventArgs e)
+        {
+            label1.Text = _stock;
+            InitializeDataComboBox();
+            DisplayStockPriceGraph(_currentDate, _oldestDate, _stock);
+        }
+        private void DisplayStockPriceGraph(DateTime currentDate, DateTime oldestDate, string stock)
+        {
+            List<(DateTime, decimal)> stockPrices = FetchStockPriceHistory(currentDate, oldestDate, stock);
+
+            PlotModel graphModel = new PlotModel { Title = "Stock Prices Over Time" };
+            LineSeries priceLineSeries = new LineSeries { Title = stock, MarkerType = MarkerType.Circle };
+
+            foreach ((DateTime date, decimal price) in stockPrices)
+            {
+                // Convert DateTime to OxyPlot's DateTimeAxis format
+                double dateAxis = DateTimeAxis.ToDouble(date);
+                priceLineSeries.Points.Add(new DataPoint(dateAxis, (double)price));
+            }
+
+            graphModel.Series.Add(priceLineSeries);
+            graphModel.Axes.Add(new DateTimeAxis
+            {
+                Position = AxisPosition.Bottom,
+                StringFormat = "yyyy-MM-dd",
+                Title = "Date",
+                IntervalType = DateTimeIntervalType.Days,
+                MinorIntervalType = DateTimeIntervalType.Days,
+                MajorGridlineStyle = LineStyle.Solid,
+                MinorGridlineStyle = LineStyle.Dot,
+
+            });
+            Graph.Model = graphModel;
         }
         public void InitializeDataComboBox()
         {
+            decimal latestPrice = LatestPrice(_currentDate, _stock);
+            if (latestPrice == -1)
+            {
+                LatestPriceLabel.Text = ($"{_stock} not in database");
+            }
+            else
+            {
+                LatestPriceLabel.Text = latestPrice.ToString();
+            }
+
             List<string> values = new List<string> { "Open", "High", "Low", "Close", "Volume" };
             foreach (string value in values)
             {
@@ -43,64 +96,35 @@ namespace Trading.GUI
             comboBox1.SelectedItem = "Close";
 
         }
-        private List<decimal> ShowGraph(DateTime currentDate, DateTime oldestDate, string company) //DateTime _currentDate = new DateTime(2024, 2, 6);
+        private List<(DateTime, decimal)> FetchStockPriceHistory(DateTime endDate, DateTime oldestDate, string stock)
         {
-            List<decimal> values = new List<decimal>();
-            bool checkDate = true;
-            while (checkDate)
+            List<(DateTime, decimal)> stockPrices = new List<(DateTime, decimal)>();
+            while (endDate > oldestDate)
             {
-                if (db.CheckFieldPopulated(currentDate, company))
+                if (_db.CheckRecordPopulated(endDate, stock))
                 {
-                    decimal price = db.GetData(currentDate, company);
-                    values.Add(price);
+                    decimal price = _db.GetData(endDate, stock);
+                    stockPrices.Add((endDate, price));
                 }
-                if (currentDate > oldestDate)
-                {
-                    currentDate = currentDate.AddDays(-1);
-                }
+                endDate = endDate.AddDays(-1);
             }
-            return values;
+            return stockPrices;
         }
 
         private decimal LatestPrice(DateTime currentDate, string company, string value = "Close")
         {
-
-            if (db.CheckFieldPopulated(currentDate, company))
-            {   
-                decimal price = db.GetData(currentDate, company, value);
-                return price;
-            }
-            else
-            {
-                throw new Exception("Provided date has not data");
-            }
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            label3.Text = LatestPrice(_currentDate, _stock).ToString();
-            Graph graph = new Graph();
-            graph.Show();
-        }
-
-        private void label3_Click(object sender, EventArgs e)
-        {
-
+            decimal price = _db.GetData(currentDate, company, value);
+            return price;
         }
 
         private void dateTimePicker1_ValueChanged(object sender, EventArgs e)
         {
             DateTime selectedDate = dateTimePicker1.Value;
             string value = comboBox1.Text.ToString(); //either "" or one of the values provided
-            ShowValueAtDate(value, selectedDate);   
+            ShowValueAtDate(value, selectedDate);
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        private void StockAttributesComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             DateTime selectedDate = dateTimePicker1.Value;
             string value = comboBox1.Text.ToString(); //either "" or one of the values provided
@@ -110,17 +134,17 @@ namespace Trading.GUI
         {
             if (!string.IsNullOrEmpty(_stock)) // Check if _company is not null or empty
             {
-                if (db.CheckFieldPopulated(selectedDate, _stock))
+                if (_db.CheckRecordPopulated(selectedDate, _stock))
                 {
                     string price = "An error has occured"; //is this good, should never happen, but if i did not include this then label5.Text = , would not recognize price, potentially could have done: decimal price = -1;
                     if (comboBox1.SelectedItem != null) //user has not changed comboBox1
                     {
-                        decimal data = db.GetData(selectedDate, _stock, value);
+                        decimal data = _db.GetData(selectedDate, _stock, value);
                         price = data.ToString();
                     }
                     else
                     {
-                        decimal data = db.GetData(selectedDate, _stock); //value will be automatically close
+                        decimal data = _db.GetData(selectedDate, _stock); //value will be automatically close
                         price = data.ToString();
                     }
                     label5.Text = price.ToString();

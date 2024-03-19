@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 
 namespace Trading.Library
 {
-    public class Individual //
+    public class Individual
     {
         public List<int> _chromosome { get; set; }
         public decimal _fitness { get; set; }
 
-        // Constructor
         public Individual(List<int> chromsome, decimal fitness)
         {
             _chromosome = chromsome;

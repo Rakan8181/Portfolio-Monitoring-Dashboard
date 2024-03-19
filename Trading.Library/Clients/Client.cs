@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Trading.Library
 {
-    public abstract class Client
+    public class Client
     {
         public string firstName { get; }
         public string secondName { get; }
@@ -22,27 +22,7 @@ namespace Trading.Library
         }
 
 
-/*        public string DisplayStocks()
-        {
-            string result = "";
-            foreach (string stock in stocks)
-            {
-                result += stock;
-            }
-            return result;
-        }
-
-        public void RemoveStock(string stockSymbol)
-        {
-            if (stocks.Contains(stockSymbol))
-            {
-                stocks.Remove(stockSymbol);
-            }
-            else
-            {
-                throw new InvalidOperationException($"Stock symbol {stockSymbol} not found in the client's stock list.");
-            }
-        }*/        
+      
     }
 }
     

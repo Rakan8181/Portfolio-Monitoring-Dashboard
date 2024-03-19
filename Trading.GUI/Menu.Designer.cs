@@ -28,43 +28,43 @@
         /// </summary>
         private void InitializeComponent()
         {
-            textBox1 = new TextBox();
-            textBox2 = new TextBox();
-            button1 = new Button();
+            FirstNameTextBox = new TextBox();
+            SecondNameTextBox = new TextBox();
+            AddClientButton = new Button();
             label1 = new Label();
             label2 = new Label();
             label4 = new Label();
-            button3 = new Button();
-            comboBox1 = new ComboBox();
+            DeleteClientButton = new Button();
+            ClientsComboBox = new ComboBox();
             label3 = new Label();
             label5 = new Label();
-            comboBox2 = new ComboBox();
+            StocksComboBox = new ComboBox();
+            label6 = new Label();
             SuspendLayout();
             // 
-            // textBox1
+            // FirstNameTextBox
             // 
-            textBox1.Location = new Point(568, 77);
-            textBox1.Name = "textBox1";
-            textBox1.Size = new Size(191, 27);
-            textBox1.TabIndex = 0;
-            textBox1.TextChanged += textBox1_TextChanged;
+            FirstNameTextBox.Location = new Point(568, 77);
+            FirstNameTextBox.Name = "FirstNameTextBox";
+            FirstNameTextBox.Size = new Size(191, 27);
+            FirstNameTextBox.TabIndex = 0;
             // 
-            // textBox2
+            // SecondNameTextBox
             // 
-            textBox2.Location = new Point(568, 121);
-            textBox2.Name = "textBox2";
-            textBox2.Size = new Size(191, 27);
-            textBox2.TabIndex = 1;
+            SecondNameTextBox.Location = new Point(568, 121);
+            SecondNameTextBox.Name = "SecondNameTextBox";
+            SecondNameTextBox.Size = new Size(191, 27);
+            SecondNameTextBox.TabIndex = 1;
             // 
-            // button1
+            // AddClientButton
             // 
-            button1.Location = new Point(568, 166);
-            button1.Name = "button1";
-            button1.Size = new Size(89, 53);
-            button1.TabIndex = 2;
-            button1.Text = "Add Client";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
+            AddClientButton.Location = new Point(568, 166);
+            AddClientButton.Name = "AddClientButton";
+            AddClientButton.Size = new Size(89, 53);
+            AddClientButton.TabIndex = 2;
+            AddClientButton.Text = "Add Client";
+            AddClientButton.UseVisualStyleBackColor = true;
+            AddClientButton.Click += AddClientButton_Click;
             // 
             // label1
             // 
@@ -93,29 +93,29 @@
             label4.Size = new Size(0, 20);
             label4.TabIndex = 8;
             // 
-            // button3
+            // DeleteClientButton
             // 
-            button3.Location = new Point(663, 166);
-            button3.Name = "button3";
-            button3.Size = new Size(89, 53);
-            button3.TabIndex = 12;
-            button3.Text = "Delete Client";
-            button3.UseVisualStyleBackColor = true;
-            button3.Click += button3_Click;
+            DeleteClientButton.Location = new Point(663, 166);
+            DeleteClientButton.Name = "DeleteClientButton";
+            DeleteClientButton.Size = new Size(89, 53);
+            DeleteClientButton.TabIndex = 12;
+            DeleteClientButton.Text = "Delete Client";
+            DeleteClientButton.UseVisualStyleBackColor = true;
+            DeleteClientButton.Click += DeleteClientButton_Click;
             // 
-            // comboBox1
+            // ClientsComboBox
             // 
-            comboBox1.FormattingEnabled = true;
-            comboBox1.Location = new Point(25, 84);
-            comboBox1.Name = "comboBox1";
-            comboBox1.Size = new Size(273, 28);
-            comboBox1.TabIndex = 15;
-            comboBox1.SelectedIndexChanged += comboBox1_SelectedIndexChanged;
+            ClientsComboBox.FormattingEnabled = true;
+            ClientsComboBox.Location = new Point(25, 121);
+            ClientsComboBox.Name = "ClientsComboBox";
+            ClientsComboBox.Size = new Size(273, 28);
+            ClientsComboBox.TabIndex = 15;
+            ClientsComboBox.SelectedIndexChanged += ClientsComboBox_SelectedIndexChanged;
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(25, 40);
+            label3.Location = new Point(25, 77);
             label3.Name = "label3";
             label3.Size = new Size(267, 20);
             label3.TabIndex = 16;
@@ -130,32 +130,43 @@
             label5.TabIndex = 17;
             label5.Text = "Select stock to view information";
             // 
-            // comboBox2
+            // StocksComboBox
             // 
-            comboBox2.FormattingEnabled = true;
-            comboBox2.Location = new Point(25, 311);
-            comboBox2.Name = "comboBox2";
-            comboBox2.Size = new Size(267, 28);
-            comboBox2.TabIndex = 19;
-            comboBox2.SelectedIndexChanged += comboBox2_SelectedIndexChanged;
+            StocksComboBox.FormattingEnabled = true;
+            StocksComboBox.Location = new Point(25, 311);
+            StocksComboBox.Name = "StocksComboBox";
+            StocksComboBox.Size = new Size(267, 28);
+            StocksComboBox.TabIndex = 19;
+            StocksComboBox.SelectedIndexChanged += StockInformationComboBox_SelectedIndexChanged;
             // 
-            // Form1
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Font = new Font("Segoe UI", 19.8000011F, FontStyle.Regular, GraphicsUnit.Point);
+            label6.Location = new Point(338, 21);
+            label6.Name = "label6";
+            label6.Size = new Size(107, 46);
+            label6.TabIndex = 20;
+            label6.Text = "Menu";
+            // 
+            // Menu
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 451);
-            Controls.Add(comboBox2);
+            Controls.Add(label6);
+            Controls.Add(StocksComboBox);
             Controls.Add(label5);
             Controls.Add(label3);
-            Controls.Add(comboBox1);
-            Controls.Add(button3);
+            Controls.Add(ClientsComboBox);
+            Controls.Add(DeleteClientButton);
             Controls.Add(label4);
             Controls.Add(label2);
             Controls.Add(label1);
-            Controls.Add(button1);
-            Controls.Add(textBox2);
-            Controls.Add(textBox1);
-            Name = "Form1";
+            Controls.Add(AddClientButton);
+            Controls.Add(SecondNameTextBox);
+            Controls.Add(FirstNameTextBox);
+            Name = "Menu";
             Text = "Form1";
             Load += Form1_Load;
             ResumeLayout(false);
@@ -164,16 +175,17 @@
 
         #endregion
 
-        private TextBox textBox1;
-        private TextBox textBox2;
-        private Button button1;
+        private TextBox FirstNameTextBox;
+        private TextBox SecondNameTextBox;
+        private Button AddClientButton;
         private Label label1;
         private Label label2;
         private Label label4;
-        private Button button3;
-        private ComboBox comboBox1;
+        private Button DeleteClientButton;
+        private ComboBox ClientsComboBox;
         private Label label3;
         private Label label5;
-        private ComboBox comboBox2;
+        private ComboBox StocksComboBox;
+        private Label label6;
     }
 }

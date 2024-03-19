@@ -10,16 +10,12 @@ namespace Trading.Library
 {
     public class Database
     {
-        public string _connectionString;
-        //"Data Source=C:\\Users\\44734\\source\\NEA\\Company Database.db;Mode=ReadWrite;";
-        public List<string> _stockNames;
-        public List<string> _stockSymbols;
-        public DateTime _currentDate;
+        private string _connectionString;
         public Database(string connectionString)
         {
             _connectionString = connectionString;
-            _currentDate = new DateTime();
         }
+        
         public void InsertRecord(string date, string stock, decimal open, decimal high, decimal low, decimal close, decimal volume)
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
@@ -27,10 +23,10 @@ namespace Trading.Library
                 connection.ConnectionString = _connectionString;
                 connection.Open();
                 SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "insert into Data (Date,stock,Open,High,Low,Close,Volume) values ((@Date),(@Stock),(@Open),(@High),(@Low),(@Close),(@Volume))";
+                command.CommandText = "insert into Data (Date,StockSymbol,Open,High,Low,Close,Volume) values ((@Date),(@StockSymbol),(@Open),(@High),(@Low),(@Close),(@Volume))";
                 var nameParameter1 = command.Parameters.Add("@Date", SqliteType.Text);
                 nameParameter1.Value = date;
-                var nameParameter2 = command.Parameters.Add("@Stock", SqliteType.Text);
+                var nameParameter2 = command.Parameters.Add("@StockSymbol", SqliteType.Text);
                 nameParameter2.Value = stock;
                 var nameParameter3 = command.Parameters.Add("@Open", SqliteType.Real);
                 nameParameter3.Value = open;
@@ -91,33 +87,38 @@ namespace Trading.Library
                     index = 13;
                     break;
                 default:
-                    Console.WriteLine("Invalid price type entered");
                     check = false;
                     break;
             }
             if (check)
             {
-                using (SqliteConnection connection = new SqliteConnection())
+                try
                 {
-                    connection.ConnectionString = _connectionString;
-                    connection.Open();
-                    SqliteCommand command = connection.CreateCommand();
-                    command.CommandText = $"select {fieldName} from Data where Stock = (@Stock) and Date = @Date";
-                    var stockParameter = command.Parameters.Add("@Stock", SqliteType.Text);
-                    stockParameter.Value = stock;
-                    var dateParameter = command.Parameters.Add("@Date", SqliteType.Text);
-                    dateParameter.Value = date;
-                    var dataReader = command.ExecuteReader();
-                    while (dataReader.Read())
+                    using (SqliteConnection connection = new SqliteConnection())
                     {
-                        decimal value = dataReader.GetDecimal(0);
-                        return value;
+                        connection.ConnectionString = _connectionString;
+                        connection.Open();
+                        SqliteCommand command = connection.CreateCommand();
+                        command.CommandText = $"select {fieldName} from Data where StockSymbol = (@Stock) and Date = @Date";
+                        var stockParameter = command.Parameters.Add("@Stock", SqliteType.Text);
+                        stockParameter.Value = stock;
+                        var dateParameter = command.Parameters.Add("@Date", SqliteType.Text);
+                        dateParameter.Value = date;
+                        var dataReader = command.ExecuteReader();
+                        while (dataReader.Read())
+                        {
+                            decimal value = dataReader.GetDecimal(0);
+                            return value;
+                        }
                     }
+                }
+                catch (Exception ex){
+                    return -1;
                 }
             }
             return -1;
         }
-        public bool CheckFieldPopulated(DateTime _date, string stock, string fieldName = "Close")
+        public bool CheckRecordPopulated(DateTime _date, string stock, string fieldName = "Close")
         {
             string date = _date.ToString("yyyy-MM-dd");
 
@@ -126,8 +127,8 @@ namespace Trading.Library
                 connection.Open();
                 using (SqliteCommand command = connection.CreateCommand())
                 {
-                    command.CommandText = $"SELECT {fieldName} FROM Data WHERE Stock = @Stock AND Date = @Date";
-                    command.Parameters.AddWithValue("@Stock", stock);
+                    command.CommandText = $"Select {fieldName} From Data Where StockSymbol = @StockSymbol AND Date = @Date";
+                    command.Parameters.AddWithValue("@StockSymbol", stock);
                     command.Parameters.AddWithValue("@Date", date);
 
                     using (SqliteDataReader reader = command.ExecuteReader())
@@ -148,48 +149,6 @@ namespace Trading.Library
             // Field is null or no records found for the given date and stock
             return false;
         }
-
-        public DateTime GetMostRecentDate()
-        {
-            throw new NotImplementedException();
-        }
-
-
-        /*public bool CheckFieldPopulated(DateTime _date, string stock, string field) //check if the date has already been populated into database (including prices and features)
-        {//i don't think i need this method as getdata returns -1 if date not in the database!!
-            string date = _date.ToString("yyyy-MM-dd");
-            int count = 0;
-            using (SqliteConnection connection = new SqliteConnection(_connectionString))
-            {
-                connection.ConnectionString = _connectionString;
-                connection.Open();
-                SqliteCommand command = connection.CreateCommand();
-                command.CommandText = $"select Count({field}) from Data where Date = @Date and stock = @stock";
-                var dateParameter = command.Parameters.Add("@Date", SqliteType.Text);
-                dateParameter.Value = date;
-                var stockParameter = command.Parameters.Add("@stock", SqliteType.Text);
-                stockParameter.Value = stock;
-
-                var dataReader = command.ExecuteReader();
-                while (dataReader.Read())
-                {
-                    count = dataReader.GetInt16(0);
-                    
-                }
-            }
-            if (count == 1)
-            {
-                return true;
-            }
-            else if (count == 0)
-            {
-                return false;
-            }
-            else
-            {
-                throw new Exception("Multiple primary keys in database!"); //!!don't remember why or where I got this from!
-            }
-        }*/
         public void PopulateStocksTable(List<string> _stockNames, List<string> _stockSymbols) //one time method to populate stocks table
         {//don't know why there are 2 usings but it worked when i used it icl !!
             using (var connection = new SqliteConnection(_connectionString))
@@ -248,8 +207,8 @@ namespace Trading.Library
                 connection.ConnectionString = _connectionString;
                 connection.Open();
                 SqliteCommand command = connection.CreateCommand();
-                command.CommandText = $"select {field} from Data where Stock = @Stock";
-                var stockParameter = command.Parameters.Add("@Stock", SqliteType.Text);
+                command.CommandText = $"select {field} from Data where StockSymbol = @StockSymbol";
+                var stockParameter = command.Parameters.Add("@StockSymbol", SqliteType.Text);
                 stockParameter.Value = stock;
                 var dataReader = command.ExecuteReader();
                 while (dataReader.Read())

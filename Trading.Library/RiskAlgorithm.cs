@@ -13,7 +13,6 @@ namespace Trading.Library
         private Database _db;
         private decimal[,] _covarianceMatrix = new decimal[19,19];
         private int[] _convictionMatrix = new int[19];
-        private List<string> _allStocks = StocksTextfileProcessor._stockSymbols;
         public List<Individual> _population { get; private set; }
         public Portfolio _portfolio { get; private set; }
         public RiskAlgorithm(Database db, Portfolio portfolio)
@@ -59,11 +58,6 @@ namespace Trading.Library
                 }
             }
             return bestChromosome;
-        }
-        public List<decimal> CalcReturns(string stock)
-        {
-            List<decimal> returns = _db.GetAllRecords(stock, "Returns");
-            return returns;
         }
 
         public decimal CalcCovariance(string stock1, string stock2) //only used to populate covariance matrix
@@ -131,8 +125,8 @@ namespace Trading.Library
                 for (int y = 0; y < _covarianceMatrix.GetLength(1); y++)
                 {
                     
-                    string stock1 = _allStocks[i];
-                    string stock2 = _allStocks[y];
+                    string stock1 = StocksTextfileProcessor._stockSymbols[i];
+                    string stock2 = StocksTextfileProcessor._stockSymbols[y];
                     decimal covariance = CalcCovariance(stock1, stock2);
                     _covarianceMatrix[i, y] = covariance;
                 }
@@ -163,9 +157,30 @@ namespace Trading.Library
             List<string> stocks = new List<string>();
             foreach (int i in chromosome)
             {
-                stocks.Add(_allStocks[i]);
+                stocks.Add(StocksTextfileProcessor._stockSymbols[i]);
             }
             return stocks;
+        }
+        public List<int> ConvertStocksToChromosome(List<string> stocks)
+        {
+            List<int> chromosome = new List<int>();
+
+            foreach (string stock in stocks)
+            {
+                int index = StocksTextfileProcessor._stockSymbols.IndexOf(stock);
+                if (index != -1)
+                {
+                    chromosome.Add(index);
+                }
+                else
+                {
+                    // Handle case where stock symbol is not found
+                    // You may choose to throw an exception or handle it according to your requirement
+                    // For now, let's print a warning message
+                    Console.WriteLine($"Stock symbol '{stock}' not found.");
+                }
+            }
+            return chromosome;
         }
         public decimal CalcFitness(List<int> chromosome, decimal lambda = 0)
         {
@@ -174,8 +189,7 @@ namespace Trading.Library
             {
                 foreach (int index2 in chromosome)
                 {
-                    decimal portfolioConviction = 
-                    fitness += (_covarianceMatrix[index1,index2] - (lambda*GetPortfolioConviction(chromosome)));
+                    fitness += _covarianceMatrix[index1,index2] - (lambda*GetPortfolioConviction(chromosome));
                 }
             }
             return fitness;
@@ -232,11 +246,9 @@ namespace Trading.Library
             return true;
         }
 
-        public void Generation(decimal lambda) //population is initially set to GenerateRandomPortfolios()
-        { //!! is recursion possible here? yes. GPT:
-          //As previously mentioned, recursion is not a natural fit for the iterative nature of genetic algorithms.
-          ////Iterative approaches, like the one you're using with a loop,
-          ////are more suitable and less risky in terms of running into stack overflow issues.
+
+        public void Generation(decimal lambda)
+        {
             bool checkValidCrossover = false;
             while (checkValidCrossover == false)
             {
@@ -262,8 +274,6 @@ namespace Trading.Library
         }
         public void ExecuteAlgorithm(decimal lambda = 0)
         {
-
-            //RiskAlgorithm algo = new RiskAlgorithm(db, lambda, _portfolio);
             List<List<int>> chromosomes = GenerateRandomPortfolios();
             List<Individual> individuals = new List<Individual>();
             foreach (List<int> chromosome in chromosomes)
@@ -275,23 +285,6 @@ namespace Trading.Library
             UpdatePopulation(individuals);
             for (int i = 0; i < 2000; i++)
             {
-                /*if (i == 100)
-                {
-                    algo.DisplayPopulation();
-                }
-                else if (i == 200)
-                {
-                    algo.DisplayPopulation();
-                }
-                else if (i == 400)
-                {
-                    algo.DisplayPopulation();
-                }
-                else if (i == 600)
-                {
-                    algo.DisplayPopulation();
-                }*/
-
                 Generation(lambda);
                 if (CheckPopulationConvergence())
                 {

@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="OxyPlot.WindowsForms" Version="2.1.2" />
     <PackageReference Include="ScottPlot" Version="5.0.21" />
   </ItemGroup>
 	<ItemGroup>

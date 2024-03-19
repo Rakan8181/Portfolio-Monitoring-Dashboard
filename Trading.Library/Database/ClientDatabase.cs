@@ -10,114 +10,109 @@ using System.Threading.Tasks;
 
 namespace Trading.Library
 {
-    public static class ClientDatabase
+public static class ClientDatabase
+{
+public static readonly string databasePath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\Company Database.db";
+private static readonly string _connectionString = $"Data Source={databasePath};Mode=ReadWrite;";
+
+public static string ConnectionString
+{
+    get
     {
-        //public static readonly string ftse100StocksPath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\FTSE100Stocks.txt";
-        //public static readonly string ftse100StockSymbolsPath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\FTSE100Symbols.txt";
-        public static readonly string StocksPath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\SandP500Stocks.txt"; //why ClientDatabase out of all possible class? !!!
-        public static readonly string SymbolsPath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\SandP500StocksSymbols.txt";
-        public static readonly string databasePath = "C:\\Users\\44734\\source\\NEA\\Trading-App\\Company Database.db";
+        return _connectionString;
+    }
+}
+public static void AddClientToDatabase(Client client)
+{
+    using (SqliteConnection connection = new SqliteConnection())
+    {
+        connection.ConnectionString = _connectionString;
+        connection.Open();
+        SqliteCommand command = connection.CreateCommand();
+        command.CommandText = "insert into Clients values(@ClientID,@FirstName,@SecondName)";
+        var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
+        clientIDParameter.Value = client.clientid;
+        var firstNameParameter = command.Parameters.Add("@FirstName", SqliteType.Text);
+        firstNameParameter.Value = client.firstName;
+        var secondNameParameter = command.Parameters.Add("@SecondName", SqliteType.Text);
+        secondNameParameter.Value = client.secondName;
 
-        private static readonly string _connectionString = $"Data Source={databasePath};Mode=ReadWrite;";
+        command.ExecuteNonQuery();
 
-        public static string ConnectionString
+    }
+}
+public static Portfolio ClientPortfolio(int clientid)
+{
+    List<string> stockSymbols = new List<string>();
+    List<int> quantities = new List<int>();
+    List<int> convictions = new List<int>();
+    using (SqliteConnection connection = new SqliteConnection())
+    {
+        connection.ConnectionString = _connectionString;
+        connection.Open();
+        SqliteCommand command = connection.CreateCommand();
+        command.CommandText = "select StockSymbol,Quantity,Conviction from Client_Holdings where ClientID = @ClientID";
+        var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
+        clientIDParameter.Value = clientid;
+        var dataReader = command.ExecuteReader();
+        while (dataReader.Read())
         {
-            get
-            {
-                return _connectionString;
-            }
+            stockSymbols.Add(dataReader.GetString(0));
+            quantities.Add(dataReader.GetInt32(1));
+            convictions.Add(dataReader.GetInt32(2));
         }
-        public static void AddClientToDatabase(Client client)
+    }
+    Portfolio portfolio = new Portfolio(stockSymbols, quantities, convictions);
+    return portfolio;
+}
+public static int NextAvailableClientID()
+{
+    int n = 0; //should always be updated. is this good practice to initiate this variable here?
+    using (SqliteConnection connection = new SqliteConnection())
+    {
+        connection.ConnectionString = _connectionString;
+        connection.Open();
+        SqliteCommand command = connection.CreateCommand();
+        command.CommandText = "select max(ClientID) from Clients";
+
+        var dataReader = command.ExecuteReader();
+        while (dataReader.Read())
         {
-            using (SqliteConnection connection = new SqliteConnection())
-            {
-                connection.ConnectionString = _connectionString;
-                connection.Open();
-                SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "insert into Clients values(@ClientID,@FirstName,@SecondName)";
-                var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
-                clientIDParameter.Value = client.clientid;
-                var firstNameParameter = command.Parameters.Add("@FirstName", SqliteType.Text);
-                firstNameParameter.Value = client.firstName;
-                var secondNameParameter = command.Parameters.Add("@SecondName", SqliteType.Text);
-                secondNameParameter.Value = client.secondName;
-
-                command.ExecuteNonQuery();
-
-            }
+            n = dataReader.GetInt16(0);
         }
-        public static Portfolio ClientPortfolio(int clientid)
-        {
-            List<string> stockSymbols = new List<string>();
-            List<int> quantities = new List<int>();
-            List<int> convictions = new List<int>();
-            using (SqliteConnection connection = new SqliteConnection())
-            {
-                connection.ConnectionString = _connectionString;
-                connection.Open();
-                SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "select StockSymbol,Quantity,Conviction from Client_Holdings where ClientID = @ClientID";
-                var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
-                clientIDParameter.Value = clientid;
-                var dataReader = command.ExecuteReader();
-                while (dataReader.Read())
-                {
-                    stockSymbols.Add(dataReader.GetString(0));
-                    quantities.Add(dataReader.GetInt16(1));
-                    convictions.Add(dataReader.GetInt16(2));
-                }
-            }
-            Portfolio portfolio = new Portfolio(stockSymbols, quantities, convictions);
-            return portfolio;
-        }
-        public static int NextAvailableClientID()
-        {
-            int n = 0; //should always be updated. is this good practice to initiate this variable here?
-            using (SqliteConnection connection = new SqliteConnection())
-            {
-                connection.ConnectionString = _connectionString;
-                connection.Open();
-                SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "select max(ClientID) from Clients";
-
-                var dataReader = command.ExecuteReader();
-                while (dataReader.Read())
-                {
-                    n = dataReader.GetInt16(0);
-                }
-            }
+    }
             
-            return n+1;
-        }
-        public static Dictionary<int, string> DisplayClients()
+    return n+1;
+}
+public static Dictionary<int, string> GetClients()
+{
+    Dictionary<int, string> clients = new Dictionary<int, string>();
+    using (SqliteConnection connection = new SqliteConnection())
+    {
+        connection.ConnectionString = _connectionString;
+        connection.Open();
+        SqliteCommand command = connection.CreateCommand();
+        command.CommandText = "select ClientID,ClientFirstName,ClientSecondName from Clients";
+        var dataReader = command.ExecuteReader();
+        int c = 0;
+        while (dataReader.Read())
         {
-            Dictionary<int, string> clients = new Dictionary<int, string>();
-            using (SqliteConnection connection = new SqliteConnection())
-            {
-                connection.ConnectionString = _connectionString;
-                connection.Open();
-                SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "select ClientID,ClientFirstName,ClientSecondName from Clients";
-                var dataReader = command.ExecuteReader();
-                int c = 0;
-                while (dataReader.Read())
-                {
-                    int clientid = dataReader.GetInt16(0);
-                    string firstname = dataReader.GetString(1);
-                    string secondname = dataReader.GetString(2);
-                    clients[clientid] = firstname + " " + secondname;
-                }
-            }
-            List<string> names = new List<string>();
-            foreach (KeyValuePair<int, string> kvp in clients)
-            {
-                names.Add(kvp.Value + ":" + kvp.Key);
-            }
-            Console.WriteLine(string.Join("\n", names));
-            return clients;
+            int clientid = dataReader.GetInt16(0);
+            string firstname = dataReader.GetString(1);
+            string secondname = dataReader.GetString(2);
+            clients[clientid] = firstname + " " + secondname;
         }
+    }
+    List<string> names = new List<string>();
+    foreach (KeyValuePair<int, string> kvp in clients)
+    {
+        names.Add(kvp.Value + ":" + kvp.Key);
+    }
+    Console.WriteLine(string.Join("\n", names));
+    return clients;
+}
 
-        public static List<string> GetStockSymbols(int clientID)
+        public static List<string> GetStockNames(int clientID)
         {
             List<string> stockSymbols = new List<string>();
             using (SqliteConnection connection = new SqliteConnection())
@@ -136,133 +131,132 @@ namespace Trading.Library
                 }
             }
             return stockSymbols;
-
         }
-        public static void AddStock(int clientid, string stock, int quantity, int conviction) //first need to check if portfolio is full
+    public static void AddStock(int clientid, string stock, int quantity, int conviction) //first need to check if portfolio is full
+    {
+        using (SqliteConnection connection = new SqliteConnection())
         {
-            using (SqliteConnection connection = new SqliteConnection())
-            {
-                connection.ConnectionString = _connectionString;
-                connection.Open();
-                SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "insert into Client_Holdings values (@ClientID,@StockSymbol,@Quantity,@Conviction)";
-                var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
-                clientIDParameter.Value = clientid;
-                var stockSymbolParameter = command.Parameters.Add("@StockSymbol", SqliteType.Text);
-                stockSymbolParameter.Value = stock;
-                var quantityParameter = command.Parameters.Add("@Quantity", SqliteType.Text);
-                quantityParameter.Value = quantity;
-                var convictionParameter = command.Parameters.Add("@Conviction", SqliteType.Text);
-                convictionParameter.Value = conviction;
-                command.ExecuteNonQuery();
-                Console.WriteLine($"Successfully added addded {stock} to your portfolio");
-            }
+            connection.ConnectionString = _connectionString;
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = "insert into Client_Holdings values (@ClientID,@StockSymbol,@Quantity,@Conviction)";
+            var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
+            clientIDParameter.Value = clientid;
+            var stockSymbolParameter = command.Parameters.Add("@StockSymbol", SqliteType.Text);
+            stockSymbolParameter.Value = stock;
+            var quantityParameter = command.Parameters.Add("@Quantity", SqliteType.Text);
+            quantityParameter.Value = quantity;
+            var convictionParameter = command.Parameters.Add("@Conviction", SqliteType.Text);
+            convictionParameter.Value = conviction;
+            command.ExecuteNonQuery();
+            Console.WriteLine($"Successfully added addded {stock} to your portfolio");
         }
-        public static void ClientRemovesStock(int clientid, string stock)
+    }
+    public static void ClientRemovesStock(int clientid, string stock)
+    {
+        using (SqliteConnection connection = new SqliteConnection())
         {
-            using (SqliteConnection connection = new SqliteConnection())
-            {
-                connection.ConnectionString = _connectionString;
-                connection.Open();
-                SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "delete from Client_Holdings where ClientID = @ClientID and StockSymbol = @Stock";
-                var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
-                clientIDParameter.Value = clientid;
-                var stockNameParameter = command.Parameters.Add("@Stock", SqliteType.Text);
-                stockNameParameter.Value = stock;
-                command.ExecuteNonQuery();
-                Console.WriteLine("Successfully removed stock from portfolio");
-            }
+            connection.ConnectionString = _connectionString;
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = "delete from Client_Holdings where ClientID = @ClientID and StockSymbol = @Stock";
+            var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
+            clientIDParameter.Value = clientid;
+            var stockNameParameter = command.Parameters.Add("@Stock", SqliteType.Text);
+            stockNameParameter.Value = stock;
+            command.ExecuteNonQuery();
+            Console.WriteLine("Successfully removed stock from portfolio");
         }
-        public static int GetClientID(string firstname, string secondname)
+    }
+    public static int GetClientID(string firstname, string secondname)
+    {
+        using (SqliteConnection connection = new SqliteConnection())
         {
-            using (SqliteConnection connection = new SqliteConnection())
+            connection.ConnectionString = _connectionString;
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = "select ClientID from Clients where ClientFirstName = @FirstName and ClientSecondName = @SecondName";
+            var firstNameParameter = command.Parameters.Add("@FirstName", SqliteType.Text);
+            firstNameParameter.Value = firstname;
+            var secondNameParameter = command.Parameters.Add("@SecondName", SqliteType.Text);
+            secondNameParameter.Value = secondname;
+            var dataReader = command.ExecuteReader();
+            int clientid = -1;
+            while (dataReader.Read())
             {
-                connection.ConnectionString = _connectionString;
-                connection.Open();
-                SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "select ClientID from Clients where ClientFirstName = @FirstName and ClientSecondName = @SecondName";
-                var firstNameParameter = command.Parameters.Add("@FirstName", SqliteType.Text);
-                firstNameParameter.Value = firstname;
-                var secondNameParameter = command.Parameters.Add("@SecondName", SqliteType.Text);
-                secondNameParameter.Value = secondname;
-                var dataReader = command.ExecuteReader();
-                int clientid = -1;
-                while (dataReader.Read())
-                {
-                    clientid = dataReader.GetInt32(0);
+                clientid = dataReader.GetInt32(0);
                     
-                }
-                return clientid; //if client not in database returns -1
             }
-            
+            return clientid; //if client not in database returns -1
         }
-        public static void RemoveClient(int clientid)
+            
+    }
+    public static void RemoveClient(int clientid)
+    {
+        using (SqliteConnection connection = new SqliteConnection())
         {
-            using (SqliteConnection connection = new SqliteConnection())
-            {
-                connection.ConnectionString = _connectionString;
-                connection.Open();
-                SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "delete from Clients where ClientID = @ClientID";
-                var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
-                clientIDParameter.Value = clientid;;
-                command.ExecuteNonQuery();
-            }
-            using (SqliteConnection connection = new SqliteConnection())
-            {
-                connection.ConnectionString = _connectionString;
-                connection.Open();
-                SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "delete from Client_Holdings where ClientID = @ClientID";
-                var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
-                clientIDParameter.Value = clientid; ;
-                command.ExecuteNonQuery();
-            }
+            connection.ConnectionString = _connectionString;
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = "delete from Clients where ClientID = @ClientID";
+            var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
+            clientIDParameter.Value = clientid;;
+            command.ExecuteNonQuery();
+        }
+        using (SqliteConnection connection = new SqliteConnection())
+        {
+            connection.ConnectionString = _connectionString;
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = "delete from Client_Holdings where ClientID = @ClientID";
+            var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
+            clientIDParameter.Value = clientid; ;
+            command.ExecuteNonQuery();
+        }
 
 
-        }
-        public static void UpdateShareNumber(int clientid, string stock, int shares)
-        {
+    }
+    public static void UpdateShareNumber(int clientid, string stock, int shares)
+    {
             
-            using (SqliteConnection connection = new SqliteConnection())
-            {
-                connection.ConnectionString = _connectionString;
-                connection.Open();
-                SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "update Client_Holdings set Quantity = @Shares where ClientID = @ClientID and StockSymbol = @Stock";
-                var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
-                clientIDParameter.Value = clientid;
-                var stockParameter = command.Parameters.Add("@Stock", SqliteType.Text);
-                stockParameter.Value = stock;
-                var sharesParameter = command.Parameters.Add("@Shares", SqliteType.Text);
-                sharesParameter.Value = shares;
-                command.ExecuteNonQuery();
-            }
-        }
-        public static int GetShares(int clientid, string stock)
+        using (SqliteConnection connection = new SqliteConnection())
         {
-            int shares = 0;
-            using (SqliteConnection connection = new SqliteConnection())
-            {
-                connection.ConnectionString = _connectionString;
-                connection.Open();
-                SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "select Quantity from Client_Holdings where ClientID = @ClientID and StockSymbol = @Stock";
-                var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
-                clientIDParameter.Value = clientid;
-                var stockParameter = command.Parameters.Add("@Stock", SqliteType.Text);
-                stockParameter.Value = stock;
-                var dataReader = command.ExecuteReader();
-                while (dataReader.Read())
-                {
-                    shares = dataReader.GetInt16(0);
-                }
-            }
-            return shares;
-            //call a function to set all labels and things to 0
-            //then call dashobard_load to restart, so all values get updated, then im cooking
-            //then go back to trying to plot graphs, show latest price, risk.
+            connection.ConnectionString = _connectionString;
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = "update Client_Holdings set Quantity = @Shares where ClientID = @ClientID and StockSymbol = @Stock";
+            var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
+            clientIDParameter.Value = clientid;
+            var stockParameter = command.Parameters.Add("@Stock", SqliteType.Text);
+            stockParameter.Value = stock;
+            var sharesParameter = command.Parameters.Add("@Shares", SqliteType.Text);
+            sharesParameter.Value = shares;
+            command.ExecuteNonQuery();
         }
+    }
+    public static int GetShares(int clientid, string stock)
+    {
+        int shares = 0;
+        using (SqliteConnection connection = new SqliteConnection())
+        {
+            connection.ConnectionString = _connectionString;
+            connection.Open();
+            SqliteCommand command = connection.CreateCommand();
+            command.CommandText = "select Quantity from Client_Holdings where ClientID = @ClientID and StockSymbol = @Stock";
+            var clientIDParameter = command.Parameters.Add("@ClientID", SqliteType.Text);
+            clientIDParameter.Value = clientid;
+            var stockParameter = command.Parameters.Add("@Stock", SqliteType.Text);
+            stockParameter.Value = stock;
+            var dataReader = command.ExecuteReader();
+            while (dataReader.Read())
+            {
+                shares = dataReader.GetInt32(0);
+            }
+        }
+        return shares;
+        //call a function to set all labels and things to 0
+        //then call dashobard_load to restart, so all values get updated, then im cooking
+        //then go back to trying to plot graphs, show latest price, risk.
+    }
     }
 }

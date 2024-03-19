@@ -8,14 +8,13 @@ namespace Trading.Library
 {
     public class Portfolio
     {
-        public List<string> _stockSymbols { get; private set; }
-        public List<int> _quantity { get; private set; }
-        public List<int> _conviction { get; private set; }
+        public List<string> _stockSymbols { get; }
+        public List<int> _quantity { get; }
+        public List<int> _conviction { get; }
         public Portfolio(List<string> stockSymbols, List<int> quantity, List<int> conviction) {
             _stockSymbols = stockSymbols;
             _quantity = quantity;
             _conviction = conviction;
         }
-
     }
 }

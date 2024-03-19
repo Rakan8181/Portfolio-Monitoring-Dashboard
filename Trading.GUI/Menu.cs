@@ -3,7 +3,6 @@ using System.Configuration;
 using System.Diagnostics;
 using System.Net.Sockets;
 using Trading.Library;
-using Trading.Library.Clients;
 using Trading.Library.Data;
 using static Azure.Core.HttpHeader;
 namespace Trading.GUI
@@ -11,11 +10,12 @@ namespace Trading.GUI
 {
     public partial class Menu : Form
     {
-        private ClientManager _clientManager;
         private string _apiKey = "30CYWGJ89N4IZQZP";
         private string _apiUrl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=AAPL&interval=1min&apikey={apiKey}&outputsize=compact&datatype=json";
         private string _connectionString = "Data Source=C:\\Users\\44734\\source\\NEA\\Trading-App\\Company Database.db;Mode=ReadWrite;";
         private Database _db;
+        private DateTime _currentDate;
+        private DateTime _oldestDate;
 
 
 
@@ -29,22 +29,23 @@ namespace Trading.GUI
         private void InitializeClientManager()
         {
 
-            DataProcessor dataProcessor = new DataProcessor(_apiKey, ClientDatabase.ConnectionString, _db);
-            var stocks = dataProcessor.ReadFile(ClientDatabase.SymbolsPath);
-            var stockSymbols = dataProcessor.ReadFile(ClientDatabase.SymbolsPath);
-            _clientManager = new ClientManager(ClientDatabase.ConnectionString, stocks, stockSymbols);
-            foreach (var stock in stocks)
+            DataProcessor dataProcessor = new DataProcessor(_apiKey, _db);
+            _currentDate = dataProcessor.GetNewestDate();
+            _oldestDate = dataProcessor.GetOldestDate();
+            //var stocks = dataProcessor.ReadFile(ClientDatabase.SymbolsPath);
+            //_clientManager = new ClientManager(ClientDatabase.ConnectionString, stockNames, stockSymbols);
+            foreach (var stock in StocksTextfileProcessor._stockSymbols)
             {
-                comboBox2.Items.Add(stock);
+                StocksComboBox.Items.Add(stock);
             }
         }
         private void Form1_Load(object sender, EventArgs e)
         {
-            Dictionary<int, string> clients = ClientDatabase.DisplayClients();
+            Dictionary<int, string> clients = ClientDatabase.GetClients();
             List<string> names = clients.Values.ToList();
             foreach (string name in names)
             {
-                comboBox1.Items.Add(name);
+                ClientsComboBox.Items.Add(name);
             }
         }
 
@@ -86,12 +87,12 @@ namespace Trading.GUI
             }
 
         }
-        private void button1_Click(object sender, EventArgs e)
+        private void AddClientButton_Click(object sender, EventArgs e)
         {
-            List<string> names = ClientDatabase.DisplayClients().Values.ToList();
-            string firstname = textBox1.Text;
+            List<string> names = ClientDatabase.GetClients().Values.ToList();
+            string firstname = FirstNameTextBox.Text;
             firstname = CleanName(firstname);
-            string secondname = textBox2.Text;
+            string secondname = SecondNameTextBox.Text;
             secondname = CleanName(secondname);
             secondname = secondname.Replace(" ", "");
             string name = firstname + " " + secondname;
@@ -110,7 +111,7 @@ namespace Trading.GUI
             else
             {
                 int clientid = ClientDatabase.NextAvailableClientID();
-                GoldClient client = new GoldClient(clientid, firstname, secondname);
+                Client client = new Client(clientid, firstname, secondname);
                 ClientDatabase.AddClientToDatabase(client);
                 MessageBox.Show($"{firstname} {secondname} has been added to the database");
             }
@@ -121,26 +122,21 @@ namespace Trading.GUI
 
 
 
-        private void button2_Click(object sender, EventArgs e)
+        private void DisplayClientButton_Click(object sender, EventArgs e)
         {
-            string firstname = textBox1.Text;
-            string secondname = textBox2.Text;
+            string firstname = FirstNameTextBox.Text;
+            string secondname = SecondNameTextBox.Text;
             int clientid = ClientDatabase.GetClientID(firstname, secondname);
-            GoldClient client = new GoldClient(clientid, firstname, secondname);
-            ClientDashboard dashboard = new ClientDashboard(client,_db);
+            Client client = new Client(clientid, firstname, secondname);
+            ClientDashboard dashboard = new ClientDashboard(client, _db);
             dashboard.Show();
         }
 
-        private void textBox3_TextChanged(object sender, EventArgs e)
+        private void DeleteClientButton_Click(object sender, EventArgs e)
         {
-
-        }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-            string firstname = textBox1.Text;
+            string firstname = FirstNameTextBox.Text;
             firstname = CleanName(firstname);
-            string secondname = textBox2.Text;
+            string secondname = SecondNameTextBox.Text;
             secondname = CleanName(secondname);
             int clientid = ClientDatabase.GetClientID(firstname, secondname);
             if (clientid == -1)
@@ -156,38 +152,27 @@ namespace Trading.GUI
 
         }
 
-        private void label5_Click(object sender, EventArgs e)
+        private void ClientsComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-
-        }
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            string name = comboBox1.SelectedItem.ToString();
+            string name = ClientsComboBox.SelectedItem.ToString();
             int indexSpace = name.IndexOf(" ");
             string firstname = name.Substring(0, indexSpace);
             string secondname = name.Substring(indexSpace + 1);
             int clientid = ClientDatabase.GetClientID(firstname, secondname);
-            GoldClient client = new GoldClient(clientid, firstname, secondname);
+            Client client = new Client(clientid, firstname, secondname);
             ClientDashboard dashboard = new ClientDashboard(client, _db);
             dashboard.Show();
         }
         private void ResetForm()
         {
-            comboBox1.Items.Clear();
+            ClientsComboBox.Items.Clear();
             Form1_Load(this, EventArgs.Empty);
         }
 
-        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        private void StockInformationComboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            DateTime currentDate = new DateTime(2023, 9, 14);
-            string stock = comboBox2.SelectedItem.ToString();
-            StockInfo stockinfo = new StockInfo(stock, _connectionString, currentDate);
+            string stock = StocksComboBox.SelectedItem.ToString();
+            StockInfo stockinfo = new StockInfo(stock, _connectionString, _currentDate, _oldestDate);
             stockinfo.Show();
 
         }
