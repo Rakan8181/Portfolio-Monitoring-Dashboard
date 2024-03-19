@@ -15,7 +15,42 @@ namespace Trading.Library
         {
             _connectionString = connectionString;
         }
-        
+
+        public void CreateDataTable()
+        {
+            using (SqliteConnection connection = new SqliteConnection())
+            {
+                connection.ConnectionString = _connectionString;
+                connection.Open();
+                SqliteCommand command = connection.CreateCommand();
+
+                // Drop the existing "Data" table if it exists
+                command.CommandText = "DROP TABLE IF EXISTS Data";
+                command.ExecuteNonQuery();
+
+                // Create the new "Data" table
+                command.CommandText = @"
+                CREATE TABLE Data (
+                Date    TEXT,
+                StockSymbol TEXT,
+                Open    NUMERIC,
+                High    NUMERIC,
+                Low     NUMERIC,
+                Close   NUMERIC,
+                Volume  INTEGER,
+                Returns NUMERIC,
+                Returns5    NUMERIC,
+                Returns20   NUMERIC,
+                Returns40   NUMERIC,
+                Volatility5 NUMERIC,
+                Volatility20    NUMERIC,
+                Volatility40    NUMERIC,
+                Oscillator_Price    NUMERIC,
+                Oscillator_Volatility   NUMERIC
+                )";
+                command.ExecuteNonQuery();
+            }
+        }
         public void InsertRecord(string date, string stock, decimal open, decimal high, decimal low, decimal close, decimal volume)
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
@@ -177,10 +212,10 @@ namespace Trading.Library
                 connection.ConnectionString = _connectionString;
                 connection.Open();
                 SqliteCommand command = connection.CreateCommand();
-                command.CommandText = $"update Data set {fieldName} = @Value where Stock = @Stock and Date = @Date";
+                command.CommandText = $"update Data set {fieldName} = @Value where StockSymbol = @StockSymbol and Date = @Date";
                 var dateParameter = command.Parameters.Add("@Date", SqliteType.Text);
                 dateParameter.Value = date;
-                var stockParameter = command.Parameters.Add("@Stock", SqliteType.Text);
+                var stockParameter = command.Parameters.Add("@StockSymbol", SqliteType.Text);
                 stockParameter.Value = stock;
                 var valueParameter = command.Parameters.Add("@Value", SqliteType.Text);
                 valueParameter.Value = value;
@@ -230,7 +265,7 @@ namespace Trading.Library
                 connection.ConnectionString = _connectionString;
                 connection.Open();
                 SqliteCommand command = connection.CreateCommand();
-                command.CommandText = "select StockSymbol from Stocks";
+                command.CommandText = "select Distinct StockSymbol from Data";
                 var dataReader = command.ExecuteReader();
                 while (dataReader.Read())
                 {
